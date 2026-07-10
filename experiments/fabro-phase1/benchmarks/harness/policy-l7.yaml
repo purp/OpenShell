@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Rungs C/D: full L7 inspection — TLS termination (double crypto), header
+# parse, Rego rule eval, OCSF emit per request. Rung D uses this same policy
+# and adds a placeholder Authorization header on the request (header rewrite
+# + fail-closed scan). Only network_policies differ from policy-l4.yaml, so
+# rungs hot-swap via `openshell policy set`.
+version: 1
+
+filesystem_policy:
+  include_workdir: true
+  read_only:
+    - /usr
+    - /lib
+    - /proc
+    - /dev/urandom
+    - /etc
+  read_write:
+    - /sandbox
+    - /tmp
+    - /dev/null
+    - /home/sandbox
+
+landlock:
+  compatibility: best_effort
+
+process:
+  run_as_user: sandbox
+  run_as_group: sandbox
+
+network_policies:
+  bench_echo:
+    name: bench_echo
+    endpoints:
+      - host: host.docker.internal
+        port: 8443
+        protocol: rest
+        tls: terminate
+        enforcement: enforce
+        allowed_ips:
+          - "192.168.65.0/24"
+          - "fdc4:f303:9324::/64"
+        rules:
+          - allow:
+              method: GET
+              path: "/bytes/*"
+          - allow:
+              method: GET
+              path: "/ok*"
+          - allow:
+              method: POST
+              path: "/sink"
+    binaries:
+      - { path: /usr/bin/curl }

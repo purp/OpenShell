@@ -92,11 +92,11 @@ echo "export SESSION_SECRET=${SESSION_SECRET}" > ~/fabro-env.sh
 echo "export FABRO_DEV_TOKEN=${FABRO_DEV_TOKEN}" >> ~/fabro-env.sh
 echo "export CARGO_BIN_EXE_fabro=/home/sandbox/fabro-with-proxies" >> ~/fabro-env.sh
 printf %s "${FABRO_DEV_TOKEN}" > ~/.fabro/storage/server.dev-token
-# export the worker wrapper BEFORE any fabro command spawns the embedded
-# server — the server captures its env at spawn, and `fabro secret set`
-# below starts it (pitfall #4)
-export CARGO_BIN_EXE_fabro=/home/sandbox/fabro-with-proxies
 git init -q && fabro repo init
+EOF
+
+cat << 'EOF' | openshell sandbox exec -n fabro --workdir /sandbox/demo -- bash -s
+source ~/fabro-env.sh
 fabro secret set CLAUDE_CODE_OAUTH_TOKEN "$CLAUDE_CODE_OAUTH_TOKEN"
 fabro secret set GITHUB_TOKEN "$GITHUB_TOKEN"
 EOF

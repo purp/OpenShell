@@ -1,3 +1,5 @@
 fabro-env.sh
 benchmarks/workflows/
 benchmarks/results/
+benchmarks/harness/ca/
+benchmarks/harness/results-v2/
