@@ -92,6 +92,10 @@ echo "export SESSION_SECRET=${SESSION_SECRET}" > ~/fabro-env.sh
 echo "export FABRO_DEV_TOKEN=${FABRO_DEV_TOKEN}" >> ~/fabro-env.sh
 echo "export CARGO_BIN_EXE_fabro=/home/sandbox/fabro-with-proxies" >> ~/fabro-env.sh
 printf %s "${FABRO_DEV_TOKEN}" > ~/.fabro/storage/server.dev-token
+# export the worker wrapper BEFORE any fabro command spawns the embedded
+# server — the server captures its env at spawn, and `fabro secret set`
+# below starts it (pitfall #4)
+export CARGO_BIN_EXE_fabro=/home/sandbox/fabro-with-proxies
 git init -q && fabro repo init
 fabro secret set CLAUDE_CODE_OAUTH_TOKEN "$CLAUDE_CODE_OAUTH_TOKEN"
 fabro secret set GITHUB_TOKEN "$GITHUB_TOKEN"
@@ -100,8 +104,9 @@ EOF
 # watch governance (in another terminal window)
 openshell logs fabro --tail --source sandbox     # OCSF allow/deny events
 
-# run a workflow
-openshell sandbox exec -n fabro --workdir /sandbox/demo -- bash -c 'source ~/fabro-env.sh && fabro run hello'
+# run a workflow. --environment local matters: fabro's default environment
+# is docker-provider, and there is no Docker inside the sandbox
+openshell sandbox exec -n fabro --workdir /sandbox/demo -- bash -c 'source ~/fabro-env.sh && fabro run hello --environment local'
 
 # ... and watch the tailing logs. You should see:
 # * NET:OPEN [INFO] ALLOWED /usr/local/bin/fabro(94) -> api.anthropic.com:443
