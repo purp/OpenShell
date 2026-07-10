@@ -1,0 +1,90 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Phase 1 policy: Fabro orchestrator + its agents inside ONE OpenShell sandbox.
+#
+# Deliberately near-minimal. Everything not listed is denied; every denial gets
+# logged to DENIALS.md and, if legitimate, promoted to a rule here. This file is
+# the empirical requirements list for Phase 2 per-node policies.
+#
+# Known Phase 1 limitation (approach doc §3): this is the UNION of every
+# permission any workflow node needs. Binary identity (fabro vs git) is the
+# only intra-sandbox separation available.
+version: 1
+
+filesystem_policy:
+  include_workdir: true
+  read_only:
+    - /usr
+    - /lib
+    - /proc
+    - /dev/urandom
+    - /app
+    - /etc
+    - /var/log
+  read_write:
+    - /sandbox
+    - /tmp
+    - /dev/null
+    # Fabro keeps state in ~/.fabro; bash needs its dotfiles. (Denial #1)
+    - /home/sandbox
+
+landlock:
+  compatibility: best_effort
+
+process:
+  run_as_user: sandbox
+  run_as_group: sandbox
+
+network_policies:
+  # Fabro's `api` backend agent loop calls the Anthropic Messages API directly.
+  anthropic_api:
+    name: anthropic_api
+    endpoints:
+      - host: api.anthropic.com
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        rules:
+          - allow:
+              method: POST
+              path: /v1/messages
+          - allow:
+              method: POST
+              path: /v1/messages/count_tokens
+    binaries:
+      - { path: /usr/local/bin/fabro }
+
+  # git fetch/clone over HTTPS (checkpointing pulls). Push (git-receive-pack)
+  # intentionally absent until a denial proves the workflow needs it.
+  github_git:
+    name: github_git
+    endpoints:
+      - host: github.com
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        rules:
+          - allow:
+              method: GET
+              path: /**/info/refs*
+              query:
+                service: "git-*"
+          - allow:
+              method: POST
+              path: /**/git-upload-pack
+    binaries:
+      - { path: /usr/bin/git }
+      - { path: /usr/lib/git-core/git-remote-https }
+
+  # GitHub REST reads for fabro itself (repo metadata, issues).
+  github_api_readonly:
+    name: github_api_readonly
+    endpoints:
+      - host: api.github.com
+        port: 443
+        protocol: rest
+        enforcement: enforce
+        access: read-only
+    binaries:
+      - { path: /usr/local/bin/fabro }

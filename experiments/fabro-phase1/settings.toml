@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Fabro settings for Phase 1: Anthropic via Claude Code OAuth token.
+#
+# The env credential below is an OpenShell placeholder (openshell:resolve:env:...).
+# The sandbox proxy rewrites it to the real token in-flight on allowed requests,
+# so the raw credential never exists inside the sandbox.
+#
+# A provider named anything other than "anthropic" takes fabro's Bearer-auth
+# route; the OAuth beta + version headers ride along as extra_headers.
+_version = 1
+
+[llm.providers.anthropic-oauth]
+display_name = "Anthropic (OAuth via OpenShell proxy)"
+adapter = "anthropic"
+agent_profile = "anthropic"
+base_url = "https://api.anthropic.com/v1"
+
+[llm.providers.anthropic-oauth.auth]
+# Vault, not env: fabro workers run env-cleared. The vault value is itself
+# just the OpenShell placeholder — no real secret exists anywhere in-sandbox.
+credentials = ["vault:CLAUDE_CODE_OAUTH_TOKEN"]
+
+[llm.providers.anthropic-oauth.extra_headers]
+anthropic-beta = { literal = "oauth-2025-04-20" }
+anthropic-version = { literal = "2023-06-01" }
+
+[llm.models."claude-oauth"]
+provider = "anthropic-oauth"
+api_id = "claude-haiku-4-5-20251001"
+agent_profile = "anthropic"
+display_name = "Claude Haiku 4.5 (OAuth)"
+family = "claude-haiku"
+default = true
+
+[llm.models."claude-oauth".limits]
+context_window = 200000
+max_output = 32000
+
+[llm.models."claude-oauth".features]
+tools = true
+vision = true
+reasoning = false
+prompt_cache = true
+
+[run.model]
+name = "claude-oauth"
+
+# `fabro run` embeds a local server; dev-token is the minimal auth method.
+[server.auth]
+methods = ["dev-token"]
