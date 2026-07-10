@@ -1,9 +1,10 @@
 # Relay latency benchmarking
 
-Companion material for the "~45 ms added latency on sandbox tunnels/egress
-small request/response" issue. This is a **temporary branch** published so
-others can reproduce the measurements on their own setups; it will be
-deleted once the issue is resolved.
+Companion material for [NVIDIA/OpenShell#2219](https://github.com/NVIDIA/OpenShell/issues/2219)
+("~45 ms added latency on sandbox tunnels/egress tinygrams due to Nagle ×
+delayed-ACK"). This is a **temporary branch** published so others can
+reproduce the measurements on their own setups; it will be deleted once the
+issue is resolved.
 
 The harness isolates where time goes on the sandbox egress path by running
 the same HTTPS workload at increasing levels of the stack (a "rung ladder"),
