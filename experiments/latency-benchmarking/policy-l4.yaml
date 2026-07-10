@@ -1,0 +1,41 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Rung B: L4 passthrough — proxy relays the tunnel without TLS termination
+# or HTTP parsing. Isolates netns + CONNECT identity + relay costs.
+# host.docker.internal resolves to a private IP -> allowed_ips required
+# (SSRF guard blocks RFC1918 by default).
+version: 1
+
+filesystem_policy:
+  include_workdir: true
+  read_only:
+    - /usr
+    - /lib
+    - /proc
+    - /dev/urandom
+    - /etc
+  read_write:
+    - /sandbox
+    - /tmp
+    - /dev/null
+    - /home/sandbox
+
+landlock:
+  compatibility: best_effort
+
+process:
+  run_as_user: sandbox
+  run_as_group: sandbox
+
+network_policies:
+  bench_echo:
+    name: bench_echo
+    endpoints:
+      - host: host.docker.internal
+        port: 8443
+        allowed_ips:
+          - "192.168.65.0/24"
+          - "fdc4:f303:9324::/64"
+    binaries:
+      - { path: /usr/bin/curl }
