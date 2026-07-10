@@ -1,8 +1,16 @@
 # Proxy-inspection cost benchmarks
 
 Question: how does OpenShell's L7 inspection cost scale with traffic volume?
-Hypothesis: roughly linear in bytes (TLS termination + header scan dominate),
-with a small per-request constant.
+
+**This v1 design is superseded — see [PLAN.md](PLAN.md).** v1 varied Haiku
+prompt/output sizes and measured end-to-end wall time; that answers "what
+dominates a workflow run" (inference, by orders of magnitude) but cannot
+attribute anything to the proxy. Reading the proxy source afterward showed
+why: request bodies aren't scanned (header block only, body opt-in) and
+response bodies are blind-relayed, so the only per-byte cost is double TLS
+crypto — ~microseconds at the sizes v1 used. PLAN.md rebuilds this as a
+code-derived cost model (per-connection / per-request / per-byte) with an
+echo-server component ladder and real statistics.
 
 ## Method
 
@@ -71,7 +79,11 @@ Takeaways:
 - **Response size dominates** (~3.5s → ~18s for 100 → 1000 words), and that
   is generation time, not proxy time — the proxy relays the response stream
   without per-byte rule matching.
-- So: "roughly linear in bytes" may still be true of the proxy in isolation,
-  but the slope is so shallow that it is invisible next to inference. At
-  workflow scale, proxy inspection cost is noise. Larger payloads (MB-scale
-  request bodies) would be needed to surface a measurable slope.
+- Post-hoc code reading explains the zero slope: prompt bytes ride in the
+  request *body*, which the proxy relays without scanning (double TLS crypto
+  only, ~1-3 µs/KB predicted) — the effect v1 was looking for was ~100 µs
+  against seconds of inference. At workflow scale, proxy inspection cost is
+  noise; measuring the proxy itself needs the component design in PLAN.md.
+- Methodology caveats found in review: identical prompts across reps with
+  `prompt_cache = true` (reps 2-3 likely cache-hit), n=3, blocked rather
+  than interleaved run order, host-side wall clock only.
