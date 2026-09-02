@@ -109,7 +109,7 @@ For each file in the table above, check for the following inconsistencies:
 
 ### Issue Lifecycle Documentation
 
-1. **`CONTRIBUTING.md` issue lifecycle section** — State, roadmap, acceptance-signal, and lifecycle-state meanings must match `AGENTS.md`.
+1. **`docs/contributing/issue-lifecycle.mdx`** — The published lifecycle reference. State, roadmap, acceptance-signal, and lifecycle-state meanings must match `AGENTS.md`. `CONTRIBUTING.md` keeps only a pointer to this page plus the two day-to-day rules; if it starts re-explaining the lifecycle, the two will drift.
 2. **Invocation modes** — Lifecycle labels must gate unattended queue pickup without blocking a direct user request to a specific agent.
 3. **Direct-mode warnings** — Guidance must require the agent to warn about each missing or incomplete expected workflow label, continue with the requested phase, and leave labels unchanged.
 4. **Label drift** — Run the two checks below. Both must come back empty.
