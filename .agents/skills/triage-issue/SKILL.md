@@ -22,14 +22,14 @@ Triage establishes technical validity; it does not decide whether valid work bel
 - Decide that OpenShell should or should not invest in otherwise valid work.
 - Apply or remove `state:accepted`.
 - Add an issue to the roadmap project, apply or remove the `roadmap` label, or recommend a specific roadmap item.
-- Apply `agent:plan-requested` or `agent:implementation-requested`.
+- Apply `state:review-ready`, `state:agent-ready`, `state:in-progress`, or `state:pr-opened`.
 - Treat technical validity as product acceptance.
 
 OpenShell has no `priority:*` labels. Sequencing comes from association with an item on the OpenShell Roadmap, and that association is a maintainer decision.
 
-`state:validated` means the factual assessment is complete and awaits human disposition. A human declines by closing the issue as not planned with a rationale, or accepts by applying `state:accepted`, placing the issue on the roadmap, or doing both as documented in `CONTRIBUTING.md`. Accepted work may remain human-owned. A maintainer can queue deeper agent investigation or planning with `agent:plan-requested`, or a user can directly ask an agent to work on a specific issue.
+`state:validated` means the factual assessment is complete and awaits human disposition. A human declines by closing the issue as not planned with a rationale, or accepts by applying `state:accepted`, placing the issue on the roadmap, or doing both as documented in `CONTRIBUTING.md`. Accepted work may remain human-owned. A maintainer can queue deeper agent investigation or planning by applying `state:accepted` or placing the issue on the roadmap, or a user can directly ask an agent to work on a specific issue.
 
-The optional `agent:*` workflow controls unattended queue pickup: `agent:plan-requested` queues planning, and `agent:implementation-requested` queues implementation after plan review. A direct user instruction separately authorizes the phase it requests. The agent warns about missing or incomplete expected lifecycle and workflow labels, then continues without changing them.
+The later `state:*` lifecycle labels control unattended queue pickup: `state:accepted` or roadmap placement authorizes planning, and `state:agent-ready` authorizes implementation after plan review. A direct user instruction separately authorizes the phase it requests. The agent warns about missing or incomplete expected lifecycle and workflow labels, then continues without changing them.
 
 ## Agent Comment Marker
 
@@ -209,8 +209,8 @@ Post a structured comment with the triage marker:
 > `state:accepted`, associate it with a roadmap item, or do both, and decide
 > whether the work remains human-owned. Either action records acceptance;
 > roadmap placement additionally records sequencing.
-> To queue investigation or planning for an unattended agent, also apply
-> `agent:plan-requested`. You can instead directly ask an agent to use
+> Applying `state:accepted` also authorizes an unattended agent to pick up
+> investigation or planning. You can instead directly ask an agent to use
 > `create-spike` or `build-from-issue` on this issue; the agent will warn about
 > missing expected workflow labels and continue without changing them. If no,
 > close it as not planned and record the rationale.
@@ -219,7 +219,7 @@ Post a structured comment with the triage marker:
 
 For other outcomes, replace the impact and decision sections with the exact information request, objective resolution, or safe routing guidance.
 
-Keep exactly one intake/triage state among `state:triage-needed`, `state:needs-info`, and `state:validated`. Remove `state:triage-needed` after every completed assessment. Never apply `state:accepted`, any `agent:*` label, or the `roadmap` label during triage. Never close a validated issue.
+Keep exactly one intake/triage state among `state:triage-needed`, `state:needs-info`, and `state:validated`. Remove `state:triage-needed` after every completed assessment. Never apply `state:accepted`, any post-acceptance `state:*` label, or the `roadmap` label during triage. Never close a validated issue.
 ## Relationship to Other Skills
 
 ```
@@ -235,12 +235,11 @@ Community issue filed
         |
   create-spike          (if deeper investigation is approved)
         |
-  human queues planning with agent:plan-requested
-  OR directly requests planning
-        |
   build-from-issue      (creates implementation plan)
         |
-  human queues implementation with agent:implementation-requested
+  state:review-ready
+        |
+  human approves with state:agent-ready
   OR directly requests implementation
         |
   implementation
@@ -249,6 +248,6 @@ Community issue filed
 - **triage-issue** establishes technical validity and impact evidence.
 - **Humans** decide whether to accept valid work and where it lands on the roadmap.
 - **create-spike** deepens investigation only after that investment is approved.
-- **build-from-issue** may be invoked directly for a specific issue. Unattended agents use `agent:plan-requested` to pick up planning and `agent:implementation-requested` to pick up implementation.
+- **build-from-issue** may be invoked directly for a specific issue. Unattended agents use `state:accepted` or roadmap placement to pick up planning and `state:agent-ready` to pick up implementation.
 
 Triage is the assessment layer. It does not sequence work, accept it onto the roadmap, plan, or build.

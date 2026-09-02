@@ -228,12 +228,12 @@ These public, installable skills live in [`skills/`](skills/) and use the instal
 
 OpenShell is developed using the same agent-driven workflows it enables. Contributor and maintainer skills live separately in [`.agents/skills/`](.agents/skills/); they automate work on the OpenShell repository and are not included when users install the public skills:
 
-- **Spike and build:** Investigate a problem with `create-spike`; a human accepts it with `state:accepted` or [roadmap](https://github.com/orgs/NVIDIA/projects/233) placement, or declines it. Accepted work can remain human-owned or enter the optional, human-gated `agent:*` planning and implementation workflow.
+- **Spike and build:** Investigate a problem with `create-spike`; a human accepts it with `state:accepted` or [roadmap](https://github.com/orgs/NVIDIA/projects/233) placement, or declines it. Accepted work can remain human-owned or enter the optional, human-gated `state:*` planning and implementation workflow.
 - **Triage and route:** Community issues are assessed with `triage-issue`. Agents establish technical validity and impact; humans decide whether the project should act and where the work sits on the roadmap.
 - **Security review:** `review-security-issue` produces a severity assessment and remediation plan. `fix-security-issue` implements it.
 - **Repository maintenance:** `sync-agent-infra`, `update-docs-from-commits`, and other internal workflows keep code, documentation, and agent infrastructure consistent.
 
-Agent implementation is human-directed: a user may request a phase directly, or maintainers may use the optional `agent:*` workflow to queue and approve planning and implementation. See [AGENTS.md](AGENTS.md) for the full workflow chain documentation.
+Agent implementation is human-directed: a user may request a phase directly, or maintainers may use the later `state:*` lifecycle labels to queue and approve planning and implementation. See [AGENTS.md](AGENTS.md) for the full workflow chain documentation.
 
 ## Getting Help
 
