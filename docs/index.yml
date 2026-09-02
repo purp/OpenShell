@@ -29,5 +29,7 @@ navigation:
   title: "Reference"
 - folder: security
   title: "Security"
+- folder: contributing
+  title: "Contributing"
 - folder: resources
   title: "Resources"
