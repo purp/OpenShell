@@ -124,7 +124,7 @@ Based on the investigation results, select appropriate labels:
 - **Do not invent labels** — only use labels that already exist in the repo
 - **Add `state:validated` only when the evidence is sufficient for human disposition** — the spike established a coherent problem or proposal and completed the factual assessment needed for a human yes/no decision
 - **Add `state:needs-info` instead when material evidence is missing** — identify the exact evidence, reproduction details, or decision input still needed in the issue body
-- **Never add `state:accepted`, an `agent:*` label, or the `roadmap` label** — acceptance, roadmap placement, and requests for agent work require a human decision
+- **Never add `state:accepted`, `state:agent-ready`, or the `roadmap` label** — acceptance, roadmap placement, and requests for agent work require a human decision
 
 ## Step 4: Create the GitHub Issue
 
@@ -211,7 +211,7 @@ gh issue create \
 - <what tests exist for the affected area today, what patterns should be followed, any test infrastructure gaps>
 
 ---
-*Created by spike investigation. `state:validated` means the issue is ready for human disposition; `state:needs-info` means specific evidence is still required. A human applies `state:accepted` or places the issue on the roadmap if OpenShell should pursue the work. To queue unattended agent planning, a human applies `agent:plan-requested`; on a direct request, the agent warns about missing expected workflow labels and continues without changing them.*
+*Created by spike investigation. `state:validated` means the issue is ready for human disposition; `state:needs-info` means specific evidence is still required. A human applies `state:accepted` or places the issue on the roadmap if OpenShell should pursue the work. A human authorizes unattended agent implementation with `state:agent-ready`; on a direct request, the agent warns about missing expected workflow labels and continues without changing them.*
 EOF
 )"
 ```
@@ -235,7 +235,7 @@ After creating the issue, report:
 
 For `state:validated`:
 
-> Review the issue and decide whether OpenShell should pursue it. If yes, apply `state:accepted`, associate it with a roadmap item, or do both. Either action records acceptance; roadmap placement additionally records sequencing. The work may remain human-owned. Apply `agent:plan-requested` to queue planning for an unattended agent, or directly ask an agent to use `build-from-issue`; on a direct request, the agent warns about missing expected workflow labels and continues without changing them. If no, close it as not planned and record the rationale.
+> Review the issue and decide whether OpenShell should pursue it. If yes, apply `state:accepted`, associate it with a roadmap item, or do both. Either action records acceptance; roadmap placement additionally records sequencing. The work may remain human-owned. Apply `state:agent-ready` to authorize an unattended agent to build the reviewed plan, or directly ask an agent to use `build-from-issue`; on a direct request, the agent warns about missing expected workflow labels and continues without changing them. If no, close it as not planned and record the rationale.
 
 For `state:needs-info`:
 

@@ -222,7 +222,7 @@ Your agent can load skills for CLI usage (`openshell-cli`), gateway troubleshoot
 
 OpenShell is developed using the same agent-driven workflows it enables. The `.agents/skills/` directory contains workflow automation that powers the project's development cycle:
 
-- **Spike and build:** Investigate a problem with `create-spike`; a human accepts it with `state:accepted` or [roadmap](https://github.com/orgs/NVIDIA/projects/233) placement, or declines it. Accepted work can remain human-owned or enter the optional, human-gated `agent:*` planning and implementation workflow.
+- **Spike and build:** Investigate a problem with `create-spike`; a human accepts it with `state:accepted` or [roadmap](https://github.com/orgs/NVIDIA/projects/233) placement, or declines it. Accepted work can remain human-owned or enter the optional, human-gated `state:*` planning and implementation workflow.
 - **Triage and route:** Community issues are assessed with `triage-issue`. Agents establish technical validity and impact; humans decide whether the project should act and where the work sits on the roadmap.
 - **Security review:** `review-security-issue` produces a severity assessment and remediation plan. `fix-security-issue` implements it.
 - **Policy authoring:** `generate-sandbox-policy` creates YAML policies from plain-language requirements or API documentation.

@@ -88,7 +88,7 @@ The canonical workflow chains are defined in `AGENTS.md` under "## Workflow Chai
 
 ### Labels
 
-The canonical label set is used by skills and templates. The key labels are: `state:triage-needed`, `state:needs-info`, `state:validated`, `state:accepted`, `agent:plan-requested`, `agent:plan-ready`, `agent:implementation-requested`, `agent:in-progress`, `agent:pr-opened`, `roadmap`, `topic:security`, `good first issue`, `help wanted`, `spike`, and the relevant `area:*`, `topic:*`, `integration:*`, and `test:*` labels. Lifecycle and `agent:*` request labels gate unattended queue pickup. They do not prevent a direct user request: the agent warns about each missing or incomplete expected workflow label and continues with the requested phase without changing those labels.
+The canonical lifecycle label set is defined in `.agents/issue-lifecycle.yaml`. That file is the source of truth: no skill, workflow, or document may reference a `state:*` label absent from it, and every label it declares must exist on GitHub. The remaining key labels are `roadmap`, `topic:security`, `good first issue`, `help wanted`, `spike`, and the relevant `area:*`, `topic:*`, `integration:*`, and `test:*` labels. Lifecycle labels gate unattended queue pickup. They do not prevent a direct user request: the agent warns about each missing or incomplete expected workflow label and continues with the requested phase without changing those labels.
 
 ## Step 2: Check Each File for Drift
 
@@ -109,9 +109,62 @@ For each file in the table above, check for the following inconsistencies:
 
 ### Issue Lifecycle Documentation
 
-1. **`CONTRIBUTING.md` issue lifecycle section** — State, roadmap, acceptance-signal, and agent-workflow meanings must match `AGENTS.md`.
-2. **Invocation modes** — Lifecycle and `agent:*` request labels must gate unattended queue pickup without blocking a direct user request to a specific agent.
+1. **`CONTRIBUTING.md` issue lifecycle section** — State, roadmap, acceptance-signal, and lifecycle-state meanings must match `AGENTS.md`.
+2. **Invocation modes** — Lifecycle labels must gate unattended queue pickup without blocking a direct user request to a specific agent.
 3. **Direct-mode warnings** — Guidance must require the agent to warn about each missing or incomplete expected workflow label, continue with the requested phase, and leave labels unchanged.
+4. **Label drift** — Run the two checks below. Both must come back empty.
+
+#### Checking Lifecycle Label Drift
+
+`.agents/issue-lifecycle.yaml` is the source of truth. Drift can appear in either
+direction, so check both.
+
+**Documentation references a label that does not exist.** Every `state:*` label
+mentioned anywhere in the repository must be declared in the canonical file:
+
+```bash
+# Labels declared in the canonical file
+uv run --quiet --with pyyaml python -c "
+import yaml; d = yaml.safe_load(open('.agents/issue-lifecycle.yaml'))
+print('\n'.join(sorted(s['name'] for s in d['states'] + d['boundaries'])))
+" | sort > /tmp/declared.txt
+
+# Labels referenced anywhere in the repo
+grep -rho 'state:[a-z][a-z-]*' --exclude-dir=.git --exclude-dir=target . \
+  | sort -u > /tmp/referenced.txt
+
+comm -13 /tmp/declared.txt /tmp/referenced.txt   # referenced but never declared
+```
+
+Anything listed is a phantom reference. Check it against the `never_existed`
+section of the canonical file, which records labels that were documented but
+never created, then remove or correct the reference.
+
+**GitHub is missing a declared label, or its metadata drifted.** The canonical
+file records each label's colour and description, so compare against the live
+repository:
+
+```bash
+uv run --quiet --with pyyaml python -c "
+import json, subprocess, yaml
+d = yaml.safe_load(open('.agents/issue-lifecycle.yaml'))
+want = {s['name']: (s['color'].lower(), s['description']) for s in d['states'] + d['boundaries']}
+live = {l['name']: (l['color'].lower(), l['description']) for l in json.loads(
+    subprocess.run(['gh','label','list','--limit','200','--json','name,color,description'],
+                   capture_output=True, text=True).stdout)}
+for name, exp in sorted(want.items()):
+    got = live.get(name)
+    if got is None:      print(f'MISSING on GitHub: {name}')
+    elif got != exp:      print(f'DRIFT {name}: want {exp}, live {got}')
+"
+```
+
+A missing or drifted label cannot be fixed by a pull request. Report it and ask a
+maintainer to run `gh label create` or `gh label edit`.
+
+Also verify that `.github/workflows/stale.yml` exempts every state listed under
+`boundaries[].exempt` in the canonical file, and that it names no label absent
+from it. An exempt list naming a phantom label silently stops exempting anything.
 
 ### `README.md`
 

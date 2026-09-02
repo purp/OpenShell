@@ -34,7 +34,7 @@ We use a vouch system. This exists because AI makes it trivial to generate plaus
 
 Issues labeled [`good first issue`](https://github.com/NVIDIA/OpenShell/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) are scoped, well-documented, and friendly to new contributors. Start there. If you need guidance, comment on the issue.
 
-An open issue is not necessarily accepted or ready to be worked on. Human contributors should look for `state:accepted`, roadmap placement, `good first issue`, or `help wanted`, or ask a maintainer before starting. Unattended agents require the expected lifecycle state and the appropriate human-applied `agent:*` request label. An agent directly asked to work on a specific issue warns about missing or incomplete expected labels and continues with the requested phase without changing them.
+An open issue is not necessarily accepted or ready to be worked on. Human contributors should look for `state:accepted`, roadmap placement, `good first issue`, or `help wanted`, or ask a maintainer before starting. Unattended agents require the expected human-applied lifecycle state: `state:accepted` or roadmap placement to plan, and `state:agent-ready` to implement. An agent directly asked to work on a specific issue warns about missing or incomplete expected labels and continues with the requested phase without changing them.
 
 ## Before You Open an Issue
 
@@ -120,7 +120,7 @@ Each issue can require four independent decisions:
 | Assessment | Is the report technically valid, and is there enough evidence to act on it? | `state:*` |
 | Disposition | Should OpenShell pursue the work? | `state:accepted`, roadmap placement, or closure as not planned |
 | Sequencing | Where does accepted work sit relative to everything else? | Placement on the [OpenShell Roadmap](https://github.com/orgs/NVIDIA/projects/233) |
-| Ownership | Will a human implement the issue, will a user directly instruct an agent, or will a maintainer queue it for an unattended agent? | Direct instruction or optional `agent:*` workflow |
+| Ownership | Will a human implement the issue, will a user directly instruct an agent, or will a maintainer queue it for an unattended agent? | Direct instruction or the delegated `state:*` workflow |
 
 `state:validated` confirms that the factual assessment is complete, but it does not mean the project has accepted the work. A maintainer signals acceptance with `state:accepted` or roadmap placement. Roadmap placement also communicates sequencing, but it does not assign an owner or queue an unattended agent.
 
@@ -136,12 +136,12 @@ Agents investigate issues, collect evidence, and report technical findings. Huma
 | Accept or decline the work with `state:accepted`, roadmap placement, or closure | Maintainer |
 | Place the issue on the roadmap or move it | Maintainer |
 | Directly request an agent plan | User |
-| Queue an agent plan with `agent:plan-requested` | Maintainer |
+| Accept the issue so an unattended agent may plan it | Maintainer |
 | Produce a plan, implement it, and open a pull request | Agent |
 | Directly request agent implementation | User |
-| Queue approved implementation with `agent:implementation-requested` | Maintainer |
+| Queue approved implementation with `state:agent-ready` | Maintainer |
 
-Agents do not apply `state:accepted`, place issues on the roadmap, or apply `agent:plan-requested` or `agent:implementation-requested`. A direct request may authorize work outside the recorded workflow, but it does not alter the issue's disposition or make the labels accurate.
+Agents do not apply `state:accepted`, place issues on the roadmap, or apply `state:agent-ready`. A direct request may authorize work outside the recorded workflow, but it does not alter the issue's disposition or make the labels accurate.
 
 #### Issue State
 
@@ -152,11 +152,17 @@ The `state:*` namespace records the issue's disposition for all contributors, re
 | `state:triage-needed` | The issue has not been assessed. New issues from users without repository write access receive this automatically. | Investigate the report and record the result. |
 | `state:needs-info` | The assessment needs specific evidence or reproduction details. | The reporter or another contributor supplies the requested information. |
 | `state:validated` | The factual assessment is complete. | A maintainer accepts the issue, declines it, or asks for more evidence. |
-| `state:accepted` | A maintainer decided that OpenShell should pursue the issue. | A human may implement it, or a maintainer may delegate work to an agent. |
+| `state:accepted` | A maintainer decided that OpenShell should pursue the issue. | A human implements it, or a maintainer delegates it to an agent. |
+| `state:review-ready` | An agent produced an implementation plan and is waiting on a human to read it. | A human reviews the plan and either requests changes or authorizes the build. |
+| `state:agent-ready` | A human reviewed the plan and authorized an agent to build it. | An agent implements the approved plan. |
+| `state:in-progress` | An agent is implementing the approved plan. | The agent opens a pull request, or reports that it could not finish. |
+| `state:pr-opened` | Implementation produced a pull request. | The pull request is reviewed and merged or closed. |
 
-Keep one of these states on an open issue. When new evidence resolves a `state:needs-info` request, reassess the issue and move it to `state:validated` if the evidence is sufficient.
+Keep exactly one of these states on an open issue. When new evidence resolves a `state:needs-info` request, reassess the issue and move it to `state:validated` if the evidence is sufficient.
 
-`state:stale` is an inactivity marker, not a lifecycle decision. Accepted issues and issues awaiting human disposition are exempt from stale handling. An issue in `state:needs-info` can become stale if no new evidence arrives.
+The canonical machine-readable definition of these labels lives in [`.agents/issue-lifecycle.yaml`](.agents/issue-lifecycle.yaml). That file is the source of truth: no document, skill, or workflow may reference a `state:*` label it does not declare, and every label it declares exists on GitHub.
+
+`state:stale` is not in that list because it is not a lifecycle state. It is an orthogonal inactivity marker: an item that goes stale keeps whatever lifecycle state it already had, drops out of every routine process except automatic closure, and rejoins on activity. Issues in the four in-flight states above, plus `state:accepted` and roadmap issues, are exempt from stale handling entirely. An issue in `state:needs-info` can go stale when no new evidence arrives.
 
 #### Assessing an Incoming Issue
 
@@ -197,35 +203,25 @@ Roadmap placement does not assign an owner. A roadmap issue still needs a human 
 
 #### Human or Agent Ownership
 
-A human contributor may implement an accepted issue without any `agent:*` label. Before starting, check for an assignee, linked pull request, active branch, or comment that shows someone else is already working on it.
+A human contributor may implement an accepted issue without any delegation label. Before starting, check for an assignee, linked pull request, active branch, or comment that shows someone else is already working on it.
 
-Maintainers use the `agent:*` workflow to queue work for always-on or unattended agents that scan issues. Keep exactly one agent-workflow label on the issue at a time. When a user directly asks an agent to plan or implement a specific issue, that instruction authorizes the requested phase even if the issue does not match the normal lifecycle or agent-workflow state. The agent warns about each missing or incomplete expected label and continues without changing the labels.
-
-| Agent workflow | Applied by | Meaning |
-|---|---|---|
-| `agent:plan-requested` | Maintainer | Ask an agent to produce an implementation plan. |
-| `agent:plan-ready` | Agent | The plan is ready for human review. |
-| `agent:implementation-requested` | Maintainer | The plan is approved and an agent may implement it. |
-| `agent:in-progress` | Agent | Authorized implementation is underway. |
-| `agent:pr-opened` | Agent | The implementation produced a pull request. |
+Delegation to an always-on or unattended agent uses the same `state:*` lifecycle, not a separate namespace. The later states carry the delegation. When a user directly asks an agent to plan or implement a specific issue, that instruction authorizes the requested phase even if the issue does not match the normal lifecycle state. The agent warns about each missing or incomplete expected label and continues without changing the labels.
 
 The normal delegated workflow is:
 
 ```text
-(state:accepted OR roadmap placement)
+state:accepted OR roadmap placement   (human: pursue this)
   |
-  +-- agent:plan-requested
+  +-- state:review-ready              (agent: plan written, awaiting review)
         |
-        +-- agent:plan-ready
+        +-- state:agent-ready         (human: plan approved, build it)
               |
-              +-- agent:implementation-requested
+              +-- state:in-progress   (agent: building)
                     |
-                    +-- agent:in-progress
-                          |
-                          +-- agent:pr-opened
+                    +-- state:pr-opened
 ```
 
-`agent:plan-requested` authorizes an unattended agent to pick up planning, not implementation. `agent:implementation-requested` confirms that a human reviewed the plan and authorizes an unattended agent to pick up implementation. Agents never apply either request label. Planning authority does not imply implementation authority.
+Two of these transitions are human gates, and agents never apply either. `state:accepted` (or roadmap placement) authorizes an unattended agent to pick up planning, not implementation. `state:agent-ready` confirms that a human reviewed the plan and authorizes an unattended agent to pick up implementation. Planning authority does not imply implementation authority.
 
 #### Spikes
 
@@ -244,9 +240,9 @@ Do not file or discuss suspected vulnerabilities in a public GitHub issue. Follo
 
 Maintainers use the specialized security review and remediation workflow for an authorized security issue. For unattended processing, it uses the same queue controls:
 
-1. A maintainer applies `agent:plan-requested` to request a security review and remediation plan.
-2. The review agent replaces it with `agent:plan-ready`.
-3. A maintainer reviews the plan and applies `agent:implementation-requested`.
+1. A maintainer applies `state:accepted` to authorize a security review and remediation plan.
+2. The review agent replaces it with `state:review-ready`.
+3. A maintainer reviews the plan and applies `state:agent-ready`.
 4. The remediation agent implements the approved plan.
 
 A user may instead directly request review or remediation from the specialized skill. If the corresponding queue label is missing, the agent warns and continues without changing it, but a request for review still does not authorize remediation. General implementation agents do not process issues labeled `topic:security`.
@@ -256,15 +252,15 @@ A user may instead directly request review or remediation from the specialized s
 | You are | Ready when |
 |---|---|
 | A human contributor | The issue has `state:accepted`, roadmap placement, an invitation to contribute, or maintainer confirmation, and has no conflicting owner or implementation. |
-| An unattended agent scanning for planning work | The issue has `state:accepted` or roadmap placement, plus the human-applied `agent:plan-requested` label. |
-| An unattended agent scanning for implementation work | The issue has `state:accepted` or roadmap placement, plus an approved plan and the human-applied `agent:implementation-requested` label. |
+| An unattended agent scanning for planning work | The issue has `state:accepted` or roadmap placement, and no plan yet. |
+| An unattended agent scanning for implementation work | The issue has `state:accepted` or roadmap placement, plus an approved plan and the human-applied `state:agent-ready` label. |
 | An agent directly instructed by a user | The instruction explicitly requests the phase the agent will perform and the issue has no conflicting owner or implementation. Missing or incomplete workflow labels produce a warning, not a stop. |
 
 For unattended agents, `state:needs-info` blocks work until the requested evidence arrives, and `state:triage-needed` or `state:validated` blocks work unless a maintainer has separately placed the issue on the roadmap or applied `state:accepted`. For a directly instructed agent, these labels require a warning but do not themselves block the requested work. If information actually needed to do the work is unavailable, the agent reports that concrete blocker rather than treating the label as the blocker.
 
 #### Stale Issues
 
-Inactive issues and pull requests are automatically labeled `state:stale` after 14 days without activity. Automated closing is currently disabled. Comment on the item or remove `state:stale` to keep it active. Issues awaiting triage or human disposition, accepted issues, active agent workflows, and roadmap issues are exempt. `state:needs-info` may become stale when no new evidence arrives.
+Inactive issues and pull requests are automatically labeled `state:stale` after 14 days without activity. Automated closing is currently disabled. Comment on the item or remove `state:stale` to keep it active. Staleness is orthogonal to the lifecycle: a stale item keeps its `state:*` label and rejoins the normal process on activity. Issues awaiting triage or human disposition, accepted issues, issues in any in-flight delegated state, and roadmap issues are exempt. `state:needs-info` may become stale when no new evidence arrives.
 
 ## Prerequisites
 

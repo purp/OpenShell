@@ -1,0 +1,134 @@
+# Canonical source of truth for OpenShell's issue lifecycle labels.
+#
+# Every label named here exists in the repository. Documentation and skills must
+# not describe a label that is absent from this file, and this file must not
+# describe a label that is absent from GitHub. `sync-agent-infra` checks both
+# directions.
+#
+# Consumers:
+#   .github/workflows/issue-triage.yml   applies state:triage-needed on open
+#   .github/workflows/stale.yml          applies and exempts state:stale
+#   .agents/skills/*/SKILL.md            gate on lifecycle states
+#   AGENTS.md, CONTRIBUTING.md           document them for humans
+#
+# Renaming a label means updating `name` here, recording the old name under
+# `previously`, and running `sync-agent-infra` to propagate the change.
+
+version: 1
+
+# A lifecycle state is any label under `prefix` that is not listed in
+# `not_lifecycle`. Anything carrying one of these labels is somewhere in the
+# process; anything carrying none of them has not entered it.
+prefix: "state:"
+not_lifecycle:
+  - state:stale
+
+# An open issue should carry exactly one lifecycle state.
+states:
+  - name: state:triage-needed
+    color: D93F0B
+    description: Opened without agent diagnostics and needs triage
+    meaning: The issue has not been assessed.
+    applied_by: [automation, maintainer]
+    agents_may_apply: false
+    next: Investigate the report and record the result.
+
+  - name: state:needs-info
+    color: D93F0B
+    description: Assessment needs specific evidence or reproduction details
+    meaning: The assessment is blocked on evidence only the reporter can supply.
+    applied_by: [triage-agent, maintainer]
+    agents_may_apply: true
+    next: >-
+      The reporter supplies the requested information. Reassess on arrival; the
+      answer may reveal that still more is needed, so this state can repeat.
+
+  - name: state:validated
+    color: aaaaaa
+    description: The factual assessment is complete
+    meaning: >-
+      Technically valid with enough evidence to act on. This records assessment,
+      not acceptance -- it does not mean OpenShell will pursue the work.
+    applied_by: [triage-agent, maintainer]
+    agents_may_apply: true
+    next: A maintainer accepts the issue, declines it, or asks for more evidence.
+
+  - name: state:accepted
+    color: 0E8A16
+    description: A maintainer decided OpenShell should pursue this issue
+    meaning: Disposition recorded. Roadmap placement additionally carries sequencing.
+    applied_by: [maintainer]
+    agents_may_apply: false
+    next: A human implements it, or a maintainer delegates it to an agent.
+
+  - name: state:review-ready
+    color: cd5b45
+    description: Ready for human review
+    meaning: An agent produced an implementation plan and is waiting on a human to read it.
+    applied_by: [build-agent, maintainer]
+    agents_may_apply: true
+    previously: [agent:plan-ready]
+    next: A human reviews the plan and either requests changes or authorizes the build.
+
+  - name: state:agent-ready
+    color: "009966"
+    description: Approved for agent implementation
+    meaning: >-
+      The human gate. A human reviewed the plan and authorized the agent to
+      build. Agents must never apply this label under any circumstances.
+    applied_by: [maintainer]
+    agents_may_apply: false
+    previously: [agent:implementation-requested]
+    next: An agent implements the approved plan.
+
+  - name: state:in-progress
+    color: 6699cc
+    description: Work is currently in progress
+    meaning: An agent is implementing the approved plan.
+    applied_by: [build-agent]
+    agents_may_apply: true
+    previously: [agent:in-progress]
+    next: The agent opens a pull request, or reports that it could not finish.
+
+  - name: state:pr-opened
+    color: 0E8A16
+    description: PR has been opened for this issue
+    meaning: >-
+      Implementation produced a pull request. Applied together with removing
+      state:in-progress and state:review-ready.
+    applied_by: [build-agent]
+    agents_may_apply: true
+    previously: [agent:pr-opened]
+    next: The pull request is reviewed and merged or closed.
+
+# Boundaries are orthogonal to the lifecycle. An item carrying a boundary label
+# keeps whatever lifecycle state it already had.
+boundaries:
+  - name: state:stale
+    color: ededed
+    description: Inactive item at risk of automatic closure.
+    meaning: >-
+      An inactivity marker, not a lifecycle decision. A stale item retains its
+      lifecycle state, drops out of every routine process except automatic
+      closure, and rejoins on activity.
+    applied_by: [automation]
+    agents_may_apply: false
+    exempt: [state:accepted, state:agent-ready, state:in-progress, state:pr-opened]
+
+# Labels documented in the repository between 2026-07-30 (#2524) and this file
+# that were never created on GitHub. Retained so that tooling and reviewers can
+# recognize stale references rather than treating them as valid gates.
+never_existed:
+  - name: agent:plan-requested
+    note: >-
+      Proposed as a queue gate for requesting an agent plan. It has no state:*
+      predecessor -- under the #454 model a plan is requested directly, and
+      state:review-ready records the result.
+  - name: agent:plan-ready
+    superseded_by: state:review-ready
+  - name: agent:implementation-requested
+    superseded_by: state:agent-ready
+  - name: agent:in-progress
+    superseded_by: state:in-progress
+  - name: agent:pr-opened
+    superseded_by: state:pr-opened
