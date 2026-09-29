@@ -414,6 +414,23 @@ The bot's full administrator documentation is internal to NVIDIA. The only comma
 | `.github/workflows/trivy-changes.yml` | Blocks pull requests and merge groups that introduce new High or Critical Helm or Dockerfile misconfigurations. |
 | `.github/workflows/trivy-scan.yml` | Manual or reusable scan of supplied OCI image/chart references and deployment configuration. Findings are informational by default and can be configured to fail the workflow. |
 
+## CI image publisher
+
+CI and release job containers pull `ghcr.io/nvidia/openshell/ci:latest`.
+Changes to the CI image inputs on protected `main` build both architectures
+and publish the multi-platform image through `ci-image.yml`. Both jobs run in
+the `ci-publish` environment, which only `main` can deploy to, and push with a
+dedicated publisher account instead of the repository `GITHUB_TOKEN`. The
+environment holds that account's credential in the `CI_IMAGE_PUBLISH_TOKEN`
+secret and its username in the `CI_IMAGE_PUBLISH_USERNAME` variable.
+
+The `ci` package does not inherit access from the repository.
+`NVIDIA/OpenShell` has Read access, so workflow jobs can pull the image with
+`GITHUB_TOKEN` but cannot publish it. Only the publisher account has Write
+access. The package and environment settings enforce this boundary, not
+workflow YAML, because a PR revision can edit its own workflow token
+permissions.
+
 ## Release workflows
 
 These workflows run after merge to publish dev/tagged artifacts and verify them. They are not PR-gated.
