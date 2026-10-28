@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+version: 1
+
+network_middlewares:
+  website-reputation:
+    name: Google Safe Browsing prototype
+    middleware: safe-browsing-example
+    order: 10
+    config: {}
+    on_error: fail_closed
+    endpoints:
+      include:
+        - example.com
+        - testsafebrowsing.appspot.com
+
+network_policies:
+  website-navigation:
+    endpoints:
+      - host: example.com
+        port: 443
+        protocol: rest
+        rules:
+          - allow:
+              method: GET
+              path: /**
+      - host: testsafebrowsing.appspot.com
+        port: 443
+        protocol: rest
+        rules:
+          - allow:
+              method: GET
+              path: /**
+    binaries:
+      - path: /usr/bin/curl

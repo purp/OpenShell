@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+[workspace]
+
+[package]
+name = "openshell-supervisor-middleware-safe-browsing"
+description = "Proof-of-concept Google Safe Browsing v5 supervisor middleware"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.94"
+license = "Apache-2.0"
+publish = false
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+openshell-core = { path = "../../crates/openshell-core", default-features = false }
+openshell-crypto = { path = "../../crates/openshell-crypto" }
+prost-types = "0.14"
+reqwest = { version = "0.12.28", default-features = false, features = ["json", "rustls-tls-no-provider"] }
+rustls = { version = "0.23", default-features = false, features = ["std", "tls12"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1.43", features = ["macros", "rt-multi-thread", "signal", "sync", "net"] }
+tokio-stream = { version = "0.1", features = ["net"] }
+tonic = { version = "0.14", features = ["transport"] }
+webpki-roots = "1"
+
+[dev-dependencies]
+openshell-policy = { path = "../../crates/openshell-policy" }
+openshell-supervisor-middleware = { path = "../../crates/openshell-supervisor-middleware" }
+wiremock = "0.6"
+
+[[bin]]
+name = "supervisor-middleware-safe-browsing"
+path = "src/main.rs"

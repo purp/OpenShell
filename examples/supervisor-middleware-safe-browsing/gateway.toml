@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright (c) 2025-2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Merge this registration into your gateway configuration. Replace this host
+# with an address reachable from BOTH the gateway and sandbox supervisors.
+[[openshell.supervisor.middleware]]
+name = "safe-browsing-example"
+grpc_endpoint = "http://host.openshell.internal:50052"
+allow_insecure_transport = true
+max_payload_bytes = 4194304
+timeout = "3s"
+binding_policy = "exact"
+bindings = ["http_request_pre_credentials"]
