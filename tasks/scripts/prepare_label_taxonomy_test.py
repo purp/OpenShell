@@ -86,21 +86,20 @@ class PreparationTests(unittest.TestCase):
         catalog = json.loads((prep.ROOT / "tasks/labels/taxonomy.json").read_text())
         roster = (prep.ROOT / "REVIEWERS.md").read_text()
         plan = prep.plan_definitions(catalog, roster, [])
-        self.assertEqual(len(plan["operations"]), 29)
-        self.assertEqual(len(catalog["retire"]), 18)
+        self.assertEqual(len(plan["operations"]), 28)
+        self.assertEqual(len(catalog["retire"]), 19)
         categories = prep.parse_reviewers(roster)
         from check_review_readiness import select_reviewers
 
-        broad = select_reviewers(categories, {"area:platform", "topic:sdk"})
+        self.assertNotIn("topic:sdk", categories)
+        initial_members = categories["topic:sdk:go"]
         for language in ("go", "python", "rust", "typescript"):
-            self.assertEqual(
-                categories[f"topic:sdk:{language}"], categories["topic:sdk"]
-            )
+            self.assertEqual(categories[f"topic:sdk:{language}"], initial_members)
             self.assertEqual(
                 select_reviewers(
                     categories, {"area:platform", f"topic:sdk:{language}"}
                 ),
-                broad,
+                categories["area:platform"] | initial_members,
             )
 
 

@@ -31,10 +31,10 @@ in other label families for separate review; it never guesses workflow states.
 
 ## Rollout
 
-1. Land reviewed routing and roster support first. SDK language topics route
-   independently, each starting with a copy of the broad SDK reviewer roster.
-   Applying a language topic does not require `topic:sdk`. Individual roster
-   subscriptions can be refined through reviewed changes afterward.
+1. Land reviewed routing and roster support first. SDK language topics replace
+   `topic:sdk` and route through their own rosters, initially seeded with the
+   previous SDK reviewers. Classify cross-SDK work with each supported language
+   topic. Individual subscriptions can be refined through reviewed changes.
 2. Review the current repository workflows, scripts, templates, skills, required
    checks, and external webhook/app/project filters for names being retired.
    Repository code alone cannot establish external compatibility. A denied

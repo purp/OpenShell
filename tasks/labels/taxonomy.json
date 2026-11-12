@@ -107,11 +107,6 @@
       "color": "b3d1eb"
     },
     {
-      "name": "topic:sdk",
-      "description": "SDK creation, maintenance, language bindings, and distribution.",
-      "color": "b3d1eb"
-    },
-    {
       "name": "topic:security",
       "description": "Vulnerability management, security analysis/auditing, bypass detection, and abuse prevention.",
       "color": "b3d1eb"
@@ -255,6 +250,12 @@
       "new_name": "retired:topic:l7",
       "color": "ededed",
       "description": "Retired; do not apply. See #5151 for item-specific migration to the current taxonomy."
+    },
+    {
+      "name": "topic:sdk",
+      "new_name": "retired:topic:sdk",
+      "color": "ededed",
+      "description": "Retired; use the supported SDK language topics instead. See #5151."
     }
   ]
 }
