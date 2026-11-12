@@ -106,6 +106,7 @@ Contributor and maintainer skills live in `.agents/skills/`. They are marked int
 | Contributing    | `create-security-advisory` | Prepare structured vulnerability reports and authorized private GitHub advisory drafts             |
 | Contributing    | `create-github-pr`        | Create pull requests with proper conventions                                                        |
 | Reviewing       | `review-github-pr`        | Summarize PR diffs and key design decisions                                                         |
+| Reviewing       | `omit-needless-words`     | Flag wordy, historical, duplicated, or out-of-spec prose and code in a change                       |
 | Reviewing       | `review-security-issue`   | Assess security issues and private advisories for severity and remediation                           |
 | Reviewing       | `fix-security-issue`      | Implement an approved security remediation plan                                                     |
 | Reviewing       | `watch-github-actions`    | Monitor CI pipeline status and logs                                                                 |
@@ -158,6 +159,8 @@ Do not classify an issue merely because it was filed or its subject is clear. Wa
 Automatic classification at issue creation and filters that exclude unaccepted work are being discussed separately in [#5261](https://github.com/NVIDIA/OpenShell/issues/5261). Until that policy changes, defer classification labels until acceptance.
 
 ### Label Discovery
+
+Classify SDK work with `topic:sdk:go`, `topic:sdk:python`, `topic:sdk:rust`, or `topic:sdk:typescript`. For work spanning SDKs, apply each supported language topic. Propose individual reviewer membership changes through review. Only apply a topic after its live definition and routing support are available.
 
 Retrieve every page of repository labels and their descriptions:
 
