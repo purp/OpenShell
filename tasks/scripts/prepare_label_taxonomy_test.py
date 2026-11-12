@@ -94,8 +94,11 @@ class PreparationTests(unittest.TestCase):
         broad = select_reviewers(categories, {"area:platform", "topic:sdk"})
         for language in ("go", "python", "rust", "typescript"):
             self.assertEqual(
+                categories[f"topic:sdk:{language}"], categories["topic:sdk"]
+            )
+            self.assertEqual(
                 select_reviewers(
-                    categories, {"area:platform", "topic:sdk", f"topic:sdk:{language}"}
+                    categories, {"area:platform", f"topic:sdk:{language}"}
                 ),
                 broad,
             )

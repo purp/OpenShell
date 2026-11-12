@@ -4,6 +4,18 @@
 [#5151](https://github.com/NVIDIA/OpenShell/issues/5151). `REVIEWERS.md` remains the
 source for full scopes and reviewer membership. The active names must match.
 
+These one-time tools live only on `purp/label-migration-tools` in `purp/OpenShell`.
+Do not merge this branch or its catalog, planner, tests, or runbook upstream.
+[PR #5503](https://github.com/NVIDIA/OpenShell/pull/5503) contains only the permanent
+routing, reviewer-roster, guidance, and regression-test changes.
+
+Fetch this branch into a local checkout:
+
+```shell
+git fetch https://github.com/purp/OpenShell.git purp/label-migration-tools
+git switch -c purp/label-migration-tools FETCH_HEAD
+```
+
 Preview all definition changes without modifying GitHub:
 
 ```shell
@@ -19,9 +31,10 @@ in other label families for separate review; it never guesses workflow states.
 
 ## Rollout
 
-1. Land reviewed routing and roster support first. SDK language topics accompany
-   `topic:sdk`; their empty membership tables add subscription scopes without
-   volunteering new reviewers. Broad SDK membership supplies reviewer coverage.
+1. Land reviewed routing and roster support first. SDK language topics route
+   independently, each starting with a copy of the broad SDK reviewer roster.
+   Applying a language topic does not require `topic:sdk`. Individual roster
+   subscriptions can be refined through reviewed changes afterward.
 2. Review the current repository workflows, scripts, templates, skills, required
    checks, and external webhook/app/project filters for names being retired.
    Repository code alone cannot establish external compatibility. A denied
@@ -44,3 +57,21 @@ cycle checkpoint labels, or invoke the item classifier during preparation.
 Recoloring/renaming definitions does not backfill reviewer requests. The later
 per-item migration uses the shared `/label-issue` path, its current acceptance
 and lifecycle checks, and an observed preview/application rollout under #5276.
+
+## Keep the tooling out of upstream
+
+After live definitions and item-level migration are verified, retain the final
+definitions in GitHub, the routing/parser changes and regression coverage, the
+reviewer roster, and the SDK classification guidance. Refine individual language
+memberships as follow-on work.
+
+The catalog, preview tool, and this runbook remain on this fork-only branch;
+there is no upstream merge-and-removal cycle. They are not a second permanent
+source of taxonomy policy. Keep the before/after audit and recovery records with
+#5151 and the review inventory.
+
+Run the tool's focused tests locally with:
+
+```shell
+uv run --no-project python -m unittest discover -s tasks/scripts -p prepare_label_taxonomy_test.py
+```
