@@ -1,0 +1,17 @@
+{
+  "repository": "NVIDIA/OpenShell",
+  "effort": "medium",
+  "models": ["sonnet", "haiku"],
+  "cases": [
+    {"number": 5446, "coverage": "Gateway issue with retired area"},
+    {"number": 5287, "coverage": "Python SDK migration issue"},
+    {"number": 5197, "coverage": "DNS/VPN issue without active classification"},
+    {"number": 5468, "coverage": "Windows driver issue"},
+    {"number": 5413, "coverage": "Labeling-quality and test-workflow issue"},
+    {"number": 5550, "coverage": "Ready PR with existing classification"},
+    {"number": 5226, "coverage": "Draft PR spanning Rust and TypeScript SDKs"},
+    {"number": 5517, "coverage": "E2E/observability PR; preserve unrelated labels"},
+    {"number": 5538, "coverage": "Documentation PR"},
+    {"number": 5551, "coverage": "Potentially unaccepted issue; gate control"}
+  ]
+}

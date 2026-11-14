@@ -109,6 +109,47 @@ Keep source tools on this branch. Raw GitHub responses, generated sheet requests
 and before/after snapshots stay outside Git; they may include issue bodies and
 are not source code. No inventory tool invokes the classifier or applies labels.
 
+## Sonnet/Haiku preview comparison
+
+`model-comparison.json` records the ten-case selection and requested effort.
+`compare_label_models.py` freezes shared helper evidence, invokes each classifier
+with tools/MCP disabled, records its unmodified output and usage, then calls the
+shared helper's read-only preview. It has no apply mode. This measures classification
+against fixed evidence, not autonomous evidence gathering. Run from this checkout
+with authenticated `gh` and Claude CLI credentials supplied by the environment.
+
+```shell
+uv run --no-project python tasks/scripts/compare_label_models.py prepare --output /tmp/openshell-label-model-comparison --number 5446
+uv run --no-project python tasks/scripts/compare_label_models.py run --output /tmp/openshell-label-model-comparison --number 5446 --model sonnet
+uv run --no-project python tasks/scripts/compare_label_models.py run --output /tmp/openshell-label-model-comparison --number 5446 --model haiku
+```
+
+Repeat for each configured number, preparing once and running each model once.
+The recorded experiment used up to three concurrent processes and alternated the
+requested model order across cases; #5446 was the initial pair. Preparation uses
+`force=True` to bypass checkpoint shortcuts, retaining acceptance/lifecycle gates.
+Gated cases are still sent to both classifiers to test respect for the same gate.
+The runners refuse to overwrite frozen inputs or existing CLI results. Preserve
+failures; use a new experiment directory for deliberate repeat trials.
+
+```shell
+uv run --no-project python tasks/scripts/compare_label_models.py report --output /tmp/openshell-label-model-comparison
+uv run --no-project python tasks/scripts/render_label_model_comparison.py --directory /tmp/openshell-label-model-comparison --output /tmp/openshell-label-model-comparison/comment.md
+```
+
+Each item/model directory contains input/system hashes, the actual model ID and
+raw CLI envelope, per-run monotonic wall time, CLI/API duration, input/output/cache
+token counts, reported list-price cost, and the unmodified response. Parseable
+classifications also have policy validation and a fresh helper preview. Model
+wall time excludes shared preparation and external preview time; the report
+lists those separately. Thinking tokens are a subset of output. Startup probes
+are not part of the paired experiment totals. Confidence is self-report; neither
+agreement nor validator acceptance establishes classification accuracy.
+
+The renderer preserves every response, including malformed JSON, and produces
+the comment body for #5276. Posting the comment is a separate authorized
+`gh issue comment --body-file` operation. It does not post automatically.
+
 ## Keep the tooling out of upstream
 
 After live definitions and item-level migration are verified, retain the final
