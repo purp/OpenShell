@@ -132,6 +132,26 @@ Gated cases are still sent to both classifiers to test respect for the same gate
 The runners refuse to overwrite frozen inputs or existing CLI results. Preserve
 failures; use a new experiment directory for deliberate repeat trials.
 
+The initial comparison was a single-attempt baseline. New runs pass a strict
+response schema through Claude's `--json-schema` and validate the result locally
+against that schema and the shared helper's policy. Every object rejects unknown
+fields, including fields inside reasons. A malformed response or failed
+schema/policy validation gets one fresh-session retry with the same frozen input,
+the rejected response, and validation errors supplied as diagnostic data. The
+runner does not repair model output. A second failure records a hold and returns
+so the next item can run. Authentication/transport failures, missing definitions,
+and stale live previews stop without repeating classification; changed evidence
+requires a new preparation and review.
+
+`attempt-1/` and, when needed, `attempt-2/` retain raw stdout/stderr, CLI envelopes,
+responses, validation errors, exact prompts, and per-attempt metrics. Root metrics
+sum both attempts' wall/API/CLI time, token counters, and reported costs. The CLI's
+own structured-output retry exhaustion may trigger the one runner retry; any
+internal CLI work remains included in its reported usage. Unavailable usage is
+flagged rather than treated as a complete measurement. Reports show attempt
+counts, final outcomes, and both responses. The original comparison artifacts
+and published results are not overwritten by the new protocol.
+
 ```shell
 uv run --no-project python tasks/scripts/compare_label_models.py report --output /tmp/openshell-label-model-comparison
 uv run --no-project python tasks/scripts/render_label_model_comparison.py --directory /tmp/openshell-label-model-comparison --output /tmp/openshell-label-model-comparison/comment.md
@@ -149,6 +169,12 @@ agreement nor validator acceptance establishes classification accuracy.
 The renderer preserves every response, including malformed JSON, and produces
 the comment body for #5276. Posting the comment is a separate authorized
 `gh issue comment --body-file` operation. It does not post automatically.
+
+Verify the retry boundaries without model requests or GitHub writes:
+
+```shell
+uv run --no-project python -m unittest discover -s tasks/scripts -p label_model_attempts_test.py
+```
 
 ## Keep the tooling out of upstream
 

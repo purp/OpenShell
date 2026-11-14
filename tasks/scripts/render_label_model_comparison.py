@@ -45,6 +45,8 @@ def token_counts(record):
 
 
 def status(record):
+    if record.get("outcome"):
+        return record["outcome"]["status"]
     if "answer" not in record:
         return "Invalid JSON / execution error"
     return (record.get("preview") or {}).get("status") or record["answer"].get(
@@ -52,6 +54,7 @@ def status(record):
     )
 
 
+with_retries = any(record.get("attempts") for record in records)
 lines = [
     "## Sonnet / Haiku label-migration preview comparison",
     "",
@@ -59,7 +62,11 @@ lines = [
     "",
     "### Method and limits",
     "",
-    "- Same ten preselected items, one fresh independent Claude CLI session per item/model, no retries or response repair. Eight items passed the shared acceptance/lifecycle gate; two were gate controls.",
+    (
+        "- Same preselected items and frozen evidence per item/model. Schema-constrained output, at most one validation-guided retry, and no automatic response repair. Each attempt uses a fresh CLI session. Per-item metrics sum both attempts; full attempt outputs and validation feedback are retained below."
+        if with_retries
+        else "- Same ten preselected items, one fresh independent Claude CLI session per item/model, no retries or response repair. Eight items passed the shared acceptance/lifecycle gate; two were gate controls."
+    ),
     "- Shared helper preparation used `force=True` only to bypass unchanged-checkpoint detection, never acceptance or lifecycle restrictions. Each model received the same frozen packet, full trusted skill/result contract, canonical scopes, current definitions, and expanded available substantive sources. Input/system hashes were recorded per run.",
     "- This is a **fixed-evidence classifier comparison**, not a benchmark of autonomous evidence gathering or a full `/label-issue` agent session. Models had no tools/MCP access and could not search for additional context. Helper validation and fresh live previews ran outside the model; no apply path was invoked.",
     "- Both CLI invocations requested `--effort medium`. The CLI accepted the flag; the output does not establish equivalent effective effort across model families. Resolved model IDs are reported below. The configured skill requires explicit ambiguity or null; null conventionally means high confidence.",
@@ -84,6 +91,17 @@ for model in config["models"]:
     lines.append(
         f"- **{model}** (`{'`, `'.join(ids)}`): {counts}; {total:,} total reported tokens; ${cost:.4f} list-price estimate; mean wall {statistics.mean(times):.2f}s, median {statistics.median(times):.2f}s. Sum of per-run wall times {sum(times):.2f}s (not elapsed batch time)."
     )
+incomplete = [
+    f"#{r['number']} {r['model']}"
+    for r in records
+    if r.get("metrics", {}).get("usage_complete") is False
+]
+if incomplete:
+    lines += [
+        "- **Incomplete usage measurements:** "
+        + ", ".join(incomplete)
+        + ". Their totals include only reported counters and are lower bounds, not complete token/cost measurements."
+    ]
 comparable = []
 for case in config["cases"]:
     pair = [r for r in records if r["number"] == case["number"]]
@@ -96,21 +114,19 @@ if comparable:
     )
 lines += [
     "",
-    "Review priorities: #5446 and #5287 differ in topic breadth; #5413 differs on the primary area (Sonnet platform, Haiku build); #5468 and #5517 differ on whether testing is substantive. Sonnet's #5197 output was malformed JSON; its proposals remain in the raw response and were not repaired or previewed.",
-    "",
-    "Haiku reported high overall confidence on all eight classified items, including its four held outputs. Sonnet reported medium on five parseable classifications and high on two. These observations warrant confidence review; they do not establish accuracy or a general model ranking.",
+    "Review differences in topic breadth, primary-area selection, confidence calibration, and contract compliance separately. Validator acceptance establishes neither correct classification nor calibrated confidence.",
     "",
     "### Per-item choices and confidence",
     "",
-    "| Item | Model | Proposed area + topics | Overall confidence | Helper outcome |",
-    "|---|---|---|---|---|",
+    "| Item | Model | Proposed area + topics | Overall confidence | Helper outcome | Attempts |",
+    "|---|---|---|---|---|---:|",
 ]
 for record in records:
     label_set = labels(record)
     label_text = ", ".join(f"`{x}`" for x in sorted(label_set)) if label_set else "—"
     confidence = (record.get("answer") or {}).get("confidence", "unparsed")
     lines.append(
-        f"| #{record['number']} | {record['model']} | {label_text} | {confidence} | {status(record)} |"
+        f"| #{record['number']} | {record['model']} | {label_text} | {confidence} | {status(record)} | {record.get('metrics', {}).get('attempt_count', 1)} |"
     )
 lines += [
     "",
@@ -192,24 +208,69 @@ for case in config["cases"]:
                 if preview.get(key):
                     lines.append(f"- {key}: " + "; ".join(str(x) for x in preview[key]))
             lines.append("")
-        answer = record.get("answer")
-        raw = (
-            json.dumps(answer, ensure_ascii=False, separators=(",", ":"))
-            if answer is not None
-            else record.get("raw_response")
-            or (record.get("parse-error") or {}).get("raw_response", "No response")
-        )
-        lines += [
-            "<details>",
-            f"<summary>Complete {model} response</summary>",
-            "",
-            "```json",
-            raw,
-            "```",
-            "",
-            "</details>",
-            "",
-        ]
+        if record.get("outcome", {}).get("diagnostics") and not preview:
+            lines += [
+                "Final diagnostics: " + "; ".join(record["outcome"]["diagnostics"]),
+                "",
+            ]
+        attempts = record.get("attempts") or [record]
+        for index, attempt in enumerate(attempts, 1):
+            answer = attempt.get("answer")
+            envelope = attempt.get("cli") or {}
+            raw = (
+                json.dumps(answer, ensure_ascii=False, separators=(",", ":"))
+                if answer is not None
+                else envelope.get(
+                    "structured_output",
+                    envelope.get(
+                        "result",
+                        attempt.get("raw_response")
+                        or (attempt.get("parse-error") or {}).get(
+                            "raw_response", "No response"
+                        ),
+                    ),
+                )
+            )
+            if not isinstance(raw, str):
+                raw = json.dumps(raw, ensure_ascii=False)
+            lines += [
+                "<details>",
+                f"<summary>Complete {model} attempt {index}</summary>",
+                "",
+                "```json",
+                raw,
+                "```",
+                "",
+            ]
+            if record.get("attempts"):
+                metrics = attempt.get("metrics") or {}
+                usage = metrics.get("usage") or {}
+                metadata = {
+                    "validation": attempt.get("validation"),
+                    "wall_seconds": metrics.get("wall_seconds"),
+                    "cli_duration_ms": metrics.get("cli_duration_ms"),
+                    "api_duration_ms": metrics.get("api_duration_ms"),
+                    "usage": {
+                        key: usage.get(key)
+                        for key in (
+                            "input_tokens",
+                            "cache_creation_input_tokens",
+                            "cache_read_input_tokens",
+                            "output_tokens",
+                            "output_tokens_details",
+                        )
+                    },
+                    "reported_cost_usd": metrics.get("reported_cost_usd"),
+                }
+                lines += [
+                    "Attempt validation and metrics:",
+                    "",
+                    "```json",
+                    json.dumps(metadata, ensure_ascii=False, separators=(",", ":")),
+                    "```",
+                    "",
+                ]
+            lines += ["</details>", ""]
 lines += [
     "### Reproduction",
     "",

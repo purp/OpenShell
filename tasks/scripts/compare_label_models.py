@@ -9,12 +9,13 @@ import json
 import subprocess
 import time
 from datetime import UTC, datetime
+from functools import partial
 from pathlib import Path
 
 import label_issue
 import label_issue_evidence as evidence
 from label_issue_github import GitHubClient
-from label_issue_policy import validate_result
+from label_model_attempts import run_attempts
 
 ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "tasks/labels/model-comparison.json"
@@ -79,7 +80,7 @@ def prepare(args, config):
 def run(args, config):
     directory = args.output / str(args.number)
     target = directory / args.model
-    if (target / "cli.json").exists():
+    if target.exists():
         raise ValueError(
             "Run already exists; preserve it and use a new output directory for repeats"
         )
@@ -116,6 +117,7 @@ Never include shell commands or Markdown fences in the JSON response.
         + contract
     )
     prompt = "Evaluate this frozen input. Do not make any live changes.\n" + raw_input
+    target.mkdir()
     write(
         target / "request.json",
         {
@@ -143,85 +145,27 @@ Never include shell commands or Markdown fences in the JSON response.
         "json",
     ]
     (target / "system.txt").write_text(system)
-    started = time.monotonic()
-    completed = subprocess.run(
-        command, input=prompt, text=True, capture_output=True, timeout=300, cwd=ROOT
-    )
-    wall = time.monotonic() - started
-    (target / "stdout.txt").write_text(completed.stdout)
-    (target / "stderr.txt").write_text(completed.stderr)
-    envelope = json.loads(completed.stdout)
-    write(target / "cli.json", envelope)
-    metrics = {
-        "number": args.number,
-        "model_alias": args.model,
-        "effort_requested": config["effort"],
-        "started_utc_note": "See artifact filesystem timestamps; wall time uses monotonic clock",
-        "wall_seconds": wall,
-        "cli_duration_ms": envelope.get("duration_ms"),
-        "api_duration_ms": envelope.get("duration_api_ms"),
-        "usage": envelope.get("usage"),
-        "model_usage": envelope.get("modelUsage"),
-        "reported_cost_usd": envelope.get("total_cost_usd"),
-        "returncode": completed.returncode,
-    }
-    write(target / "metrics.json", metrics)
-    if completed.returncode or envelope.get("is_error"):
-        print(
-            json.dumps(
-                {
-                    "number": args.number,
-                    "model": args.model,
-                    "error": envelope.get("result"),
-                }
-            ),
-            flush=True,
-        )
-        return
-    text = envelope["result"].strip()
-    if text.startswith("```"):
-        text = text.split("\n", 1)[1].rsplit("```", 1)[0].strip()
-    try:
-        answer = json.loads(text)
-    except json.JSONDecodeError as exc:
-        write(target / "parse-error.json", {"error": str(exc), "raw_response": text})
-        print(
-            json.dumps(
-                {
-                    "number": args.number,
-                    "model": args.model,
-                    "error": "Invalid classifier JSON",
-                    "detail": str(exc),
-                }
-            ),
-            flush=True,
-        )
-        return
-    write(target / "answer.json", answer)
-    if bundle["preparation"]["status"] == "ready" and answer.get("classification"):
-        manifest = directory / "evidence/manifest.json"
-        snapshot = json.loads(manifest.read_text())
-        validation = validate_result(snapshot, answer["classification"])
-        write(target / "validation.json", validation)
-        # Preview rechecks live eligibility/evidence but does not send mutations.
-        preview_started = time.monotonic()
-        preview = label_issue.preview(
-            snapshot, answer["classification"], api=GitHubClient(), executor=args.actor
-        )
-        write(target / "preview.json", preview)
-        metrics["preview_wall_seconds"] = time.monotonic() - preview_started
-        write(target / "metrics.json", metrics)
-    print(
-        json.dumps(
-            {
-                "number": args.number,
-                "model": args.model,
-                "outcome": answer.get("outcome"),
-                "confidence": answer.get("confidence"),
-                "wall_seconds": round(wall, 2),
-            }
+    manifest = directory / "evidence/manifest.json"
+    snapshot = json.loads(manifest.read_text()) if manifest.exists() else None
+    outcome = run_attempts(
+        target,
+        command,
+        prompt,
+        bundle,
+        snapshot,
+        invoke=partial(subprocess.run, cwd=ROOT),
+        preview=lambda snapshot, result, **options: label_issue.preview(
+            snapshot, result, api=GitHubClient(), **options
         ),
-        flush=True,
+        actor=args.actor,
+    )
+    metrics = json.loads((target / "metrics.json").read_text())
+    metrics.update(
+        number=args.number, model_alias=args.model, effort_requested=config["effort"]
+    )
+    write(target / "metrics.json", metrics)
+    print(
+        json.dumps({"number": args.number, "model": args.model, **outcome}), flush=True
     )
 
 
@@ -231,7 +175,14 @@ def report(args, config):
         for model in config["models"]:
             path = args.output / str(case["number"]) / model
             record = {**case, "model": model}
-            for name in ("metrics", "answer", "validation", "preview", "parse-error"):
+            for name in (
+                "metrics",
+                "answer",
+                "validation",
+                "preview",
+                "parse-error",
+                "outcome",
+            ):
                 file = path / f"{name}.json"
                 if file.exists():
                     record[name] = json.loads(file.read_text())
@@ -244,6 +195,14 @@ def report(args, config):
                 if raw_file.exists():
                     envelope = json.loads(raw_file.read_text())
                     record["raw_response"] = envelope.get("result")
+            record["attempts"] = []
+            for attempt_path in sorted(path.glob("attempt-*")):
+                attempt = {"name": attempt_path.name}
+                for name in ("cli", "answer", "validation", "metrics"):
+                    file = attempt_path / f"{name}.json"
+                    if file.exists():
+                        attempt[name] = json.loads(file.read_text())
+                record["attempts"].append(attempt)
             records.append(record)
     write(
         args.output / "comparison.json",
