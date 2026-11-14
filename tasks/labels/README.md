@@ -58,6 +58,57 @@ Recoloring/renaming definitions does not backfill reviewer requests. The later
 per-item migration uses the shared `/label-issue` path, its current acceptance
 and lifecycle checks, and an observed preview/application rollout under #5276.
 
+## Tool record and open-item inventory
+
+[Recorded definition edits](recorded-definition-edits.md) preserves the one-off
+REST operations used to create missing labels, update existing definitions, and
+retire obsolete names. It also records their verification and backup paths.
+These are past operations; do not replay them against a stale plan.
+
+Capture every page of open issues (the endpoint also includes PRs) and open PR
+metadata into a local directory outside the checkout:
+
+```shell
+mkdir -p /tmp/openshell-open-inventory
+gh api --paginate --slurp 'repos/NVIDIA/OpenShell/issues?state=open&sort=created&direction=asc&per_page=100' > /tmp/openshell-open-inventory/items.json
+gh api --paginate --slurp 'repos/NVIDIA/OpenShell/pulls?state=open&sort=created&direction=asc&per_page=100' > /tmp/openshell-open-inventory/prs.json
+uv run --no-project python tasks/scripts/inventory_open_labels.py --items-file /tmp/openshell-open-inventory/items.json --prs-file /tmp/openshell-open-inventory/prs.json --output-dir /tmp/openshell-open-inventory
+```
+
+The builder validates unique numbers and matching PR sets, then emits `rows.json`,
+`inventory.csv`, and `summary.json`. It preserves complete label sets and includes
+items with no classification labels or acceptance label. Eligibility is **not
+evaluated**; `state:accepted` presence is only an observation. Proposals remain
+blank until the shared helper examines each item. Pagination is not atomic:
+refresh mismatched inputs, and recheck each item before application.
+
+For replay, pass `--snapshot-utc` with the original UTC capture timestamp. The
+initial snapshot at `2026-11-14T19:10:37Z` contained 679 items: 449 issues and 230
+PRs, including 63 with retired labels and 535 with no classification labels at
+all. Its tab is [Open inventory 2026-11-14](https://docs.google.com/spreadsheets/d/10E4rO8_0vgOc85oxHO3uvFvshqwtdYuF_tYvoRGji90/edit#gid=51511114).
+
+Generate the Google Sheets batchUpdate body for a **new**, unused tab ID/title:
+
+```shell
+uv run --no-project python tasks/scripts/inventory_sheet_requests.py --rows-file /tmp/openshell-open-inventory/rows.json --sheet-id 51511115 --title 'Open inventory next snapshot' > /tmp/openshell-open-inventory/sheet-requests.json
+```
+
+The script performs no remote writes. Submit the structured `requests` array via
+the connected Google Drive `batch_update_spreadsheet` tool with spreadsheet ID
+`10E4rO8_0vgOc85oxHO3uvFvshqwtdYuF_tYvoRGji90`. The initial publication created
+tab ID `51511114`, then submitted cell content and formatting in a second call.
+The generator combines those steps; header notes use reusable wording. It writes
+numbers and literal strings, never interpreting issue titles or labels as formulas.
+
+After publishing, read back `A1:X<row count>` with `get_spreadsheet_range` and
+compare every cell to `rows.json`, normalizing missing trailing cells to empty
+strings and numbers to strings. This full readback passed for all 679 rows in
+the initial snapshot. No other tabs or sharing permissions were changed.
+
+Keep source tools on this branch. Raw GitHub responses, generated sheet requests,
+and before/after snapshots stay outside Git; they may include issue bodies and
+are not source code. No inventory tool invokes the classifier or applies labels.
+
 ## Keep the tooling out of upstream
 
 After live definitions and item-level migration are verified, retain the final
