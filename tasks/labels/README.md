@@ -35,10 +35,10 @@ in other label families for separate review; it never guesses workflow states.
    `topic:sdk` and route through their own rosters, initially seeded with the
    previous SDK reviewers. Classify cross-SDK work with each supported language
    topic. Individual subscriptions can be refined through reviewed changes.
-2. Review the current repository workflows, scripts, templates, skills, required
-   checks, and external webhook/app/project filters for names being retired.
-   Repository code alone cannot establish external compatibility. A denied
-   webhook lookup is an outstanding check, not evidence that no hooks exist.
+2. Review the current repository workflows, scripts, templates, skills, and
+   required checks for names being retired. External integration verification is
+   not a rollout prerequisite: the changes have been announced, and owners of
+   outward dependencies are responsible for adjusting their integrations.
 3. Refresh the preview immediately before editing definitions and keep its
    original definitions as the recovery record. Create/update active definitions
    first. Rename each obsolete label in place to its complete `retired:` name;
