@@ -64,6 +64,7 @@ for directory in args.correction_dir:
             "preparation_status": correction["preparation_status"],
             "after_labels": after,
             "proposed_final_labels": correction["proposed_final_labels"],
+            "ambiguity": correction.get("ambiguity"),
             "add": sorted(set(after) - set(before)),
             "remove": sorted(set(before) - set(after)),
             "rationale": original.get("rationale", []) + correction["rationale"],
