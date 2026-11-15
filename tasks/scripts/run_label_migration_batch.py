@@ -18,10 +18,17 @@ def main():
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--batch-size", type=int, default=10)
+    parser.add_argument(
+        "--max-batches",
+        type=int,
+        help="Return at an audit boundary; completed items are skipped on continuation",
+    )
     parser.add_argument("--apply", action="store_true")
     args = parser.parse_args()
     if args.batch_size < 1:
         parser.error("batch size must be positive")
+    if args.max_batches is not None and args.max_batches < 1:
+        parser.error("max batches must be positive")
     args.output.mkdir(parents=True, exist_ok=True)
     config = json.loads(args.config.read_text())
     pending = []
@@ -96,6 +103,15 @@ def main():
                 if stop:
                     break
         if stop:
+            break
+        if (
+            args.max_batches is not None
+            and offset // args.batch_size + 1 >= args.max_batches
+        ):
+            stop = {
+                "reason": "Planned batch audit boundary; continue with the same config/output",
+                "resumable": True,
+            }
             break
     records = [
         json.loads(path.read_text()) for path in args.output.glob("*/execution.json")
