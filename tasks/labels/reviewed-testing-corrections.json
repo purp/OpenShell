@@ -1,0 +1,157 @@
+{
+  "repository": "NVIDIA/OpenShell",
+  "cases": [
+    {
+      "number": 1969,
+      "area": "area:build",
+      "topics": [
+        "topic:documentation"
+      ],
+      "reason": "Human-reviewed correction: tests and their task/CI wiring verify this item\u2019s own feature or fix; they do not independently warrant topic:testing. Retain the previously reviewed remaining classification.",
+      "reviewed_body_sha256": "5eee540df2ae5cfea90e4fe3affba2c2db14d0020880aedd665f4759fc3d70e9"
+    },
+    {
+      "number": 2157,
+      "area": "area:drivers",
+      "topics": [
+        "topic:architecture",
+        "topic:authnz",
+        "topic:kubernetes",
+        "topic:operability",
+        "topic:performance"
+      ],
+      "reason": "Human-reviewed correction: tests and their task/CI wiring verify this item\u2019s own feature or fix; they do not independently warrant topic:testing. Retain the previously reviewed remaining classification.",
+      "reviewed_body_sha256": "a5732e1ee129b0c19c284eae5fe6ef1976fc757db537496a53a1204b6e22551c"
+    },
+    {
+      "number": 2784,
+      "area": "area:platform",
+      "topics": [
+        "topic:api",
+        "topic:authnz",
+        "topic:documentation",
+        "topic:extensions",
+        "topic:sdk:rust"
+      ],
+      "reason": "Human-reviewed correction: tests and their task/CI wiring verify this item\u2019s own feature or fix; they do not independently warrant topic:testing. Retain the previously reviewed remaining classification.",
+      "reviewed_body_sha256": "a349550bd3e994e9176805826b90c9fede53537e4ea3610a12f1040e0b06958e"
+    },
+    {
+      "number": 2846,
+      "area": "area:runtime",
+      "topics": [
+        "topic:gpu"
+      ],
+      "reason": "Human-reviewed correction: tests and their task/CI wiring verify this item\u2019s own feature or fix; they do not independently warrant topic:testing. Retain the previously reviewed remaining classification.",
+      "reviewed_body_sha256": "fb1bc791aea9214597e3be03cab8ef8ad079c53c027d4007107a51d9b1d6dcd5"
+    },
+    {
+      "number": 2961,
+      "area": "area:platform",
+      "topics": [
+        "topic:api",
+        "topic:documentation",
+        "topic:sdk:python"
+      ],
+      "reason": "Human-reviewed correction: tests and their task/CI wiring verify this item\u2019s own feature or fix; they do not independently warrant topic:testing. Retain the previously reviewed remaining classification.",
+      "reviewed_body_sha256": "0decab22846fc20e99cef57bd1dd1dac4e14dd7cd6705252c5501a2932b49fa1"
+    },
+    {
+      "number": 3001,
+      "area": "area:platform",
+      "topics": [
+        "topic:api",
+        "topic:documentation",
+        "topic:reliability",
+        "topic:sdk:go",
+        "topic:ux"
+      ],
+      "reason": "Human-reviewed correction: tests and their task/CI wiring verify this item\u2019s own feature or fix; they do not independently warrant topic:testing. Retain the previously reviewed remaining classification.",
+      "reviewed_body_sha256": "38be9a5b8cca65a96dd3ae85f936974b960b22906cc8f2c4f2b71d1f4a7b641c"
+    },
+    {
+      "number": 3528,
+      "area": "area:platform",
+      "topics": [
+        "topic:documentation",
+        "topic:kubernetes",
+        "topic:observability",
+        "topic:operability",
+        "topic:performance",
+        "topic:reliability"
+      ],
+      "reason": "Human-reviewed correction: tests and their task/CI wiring verify this item\u2019s own feature or fix; they do not independently warrant topic:testing. Retain the previously reviewed remaining classification.",
+      "reviewed_body_sha256": "e56acb29b986e7ba5391072e50bde4073ce1bfcf0607fb8d043a6d3f39ccc4ae"
+    },
+    {
+      "number": 3533,
+      "area": "area:runtime",
+      "topics": [
+        "topic:documentation",
+        "topic:policy",
+        "topic:security",
+        "topic:ux"
+      ],
+      "reason": "Human-reviewed correction: tests and their task/CI wiring verify this item\u2019s own feature or fix; they do not independently warrant topic:testing. Retain the previously reviewed remaining classification.",
+      "reviewed_body_sha256": "3be12ae613d6529b21293ba214b52578f3fb1a4138cac9720810fe9f3dcd2746"
+    },
+    {
+      "number": 3613,
+      "area": "area:platform",
+      "topics": [
+        "topic:api",
+        "topic:documentation",
+        "topic:reliability"
+      ],
+      "reason": "Human-reviewed correction: tests and their task/CI wiring verify this item\u2019s own feature or fix; they do not independently warrant topic:testing. Retain the previously reviewed remaining classification.",
+      "reviewed_body_sha256": "a80810fd3d1fd270839424a0faed8ac7cb2a9c8db8493193465a24c351b161f1"
+    },
+    {
+      "number": 3630,
+      "area": "area:drivers",
+      "topics": [
+        "topic:authnz",
+        "topic:documentation",
+        "topic:kubernetes",
+        "topic:operability",
+        "topic:security"
+      ],
+      "reason": "Human-reviewed correction: tests and their task/CI wiring verify this item\u2019s own feature or fix; they do not independently warrant topic:testing. Retain the previously reviewed remaining classification.",
+      "reviewed_body_sha256": "87f7c7e45b234c157188f9cbb584a142ee54933a0d01ecbb7af4fe625cfa24ad"
+    },
+    {
+      "number": 3634,
+      "area": "area:build",
+      "topics": [
+        "topic:documentation",
+        "topic:dx",
+        "topic:security"
+      ],
+      "reason": "Human-reviewed correction: tests and their task/CI wiring verify this item\u2019s own feature or fix; they do not independently warrant topic:testing. Retain the previously reviewed remaining classification.",
+      "reviewed_body_sha256": "d576524144c638eb7bc4131851996a6da82d313a298235aa814bf989cd53d89b"
+    },
+    {
+      "number": 3671,
+      "area": "area:build",
+      "topics": [
+        "topic:compliance",
+        "topic:documentation",
+        "topic:security"
+      ],
+      "reason": "Human-reviewed correction: tests and their task/CI wiring verify this item\u2019s own feature or fix; they do not independently warrant topic:testing. Retain the previously reviewed remaining classification.",
+      "reviewed_body_sha256": "f2171fe069c49fef06dc4962b18cf26d966926fafab2917e0fc4ea2162b21bc4"
+    },
+    {
+      "number": 3716,
+      "area": "area:runtime",
+      "topics": [
+        "topic:documentation",
+        "topic:networking",
+        "topic:policy",
+        "topic:security"
+      ],
+      "reason": "Human-reviewed correction: tests and their task/CI wiring verify this item\u2019s own feature or fix; they do not independently warrant topic:testing. Retain the previously reviewed remaining classification.",
+      "reviewed_body_sha256": "7c71546dbf5b51a94d83d10f155a8c2d7915fb48f51b679bbe0de8e7c8925e07"
+    }
+  ]
+}

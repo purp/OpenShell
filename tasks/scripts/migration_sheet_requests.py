@@ -10,6 +10,7 @@ from pathlib import Path
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--inventory-rows", type=Path, required=True)
 parser.add_argument("--execution-dir", type=Path, action="append", required=True)
+parser.add_argument("--correction-dir", type=Path, action="append", default=[])
 parser.add_argument("--audit-exists", action="store_true")
 args = parser.parse_args()
 rows = json.loads(args.inventory_rows.read_text())
@@ -24,6 +25,31 @@ records = sorted(
 )
 if len({r["number"] for r in records}) != len(records):
     raise ValueError("Duplicate audit items require explicit recovery-history handling")
+by_number = {r["number"]: r for r in records}
+for directory in args.correction_dir:
+    for path in sorted(directory.glob("*/execution.json")):
+        correction = json.loads(path.read_text())
+        original = by_number[correction["number"]]
+        if correction["status"] != "applied" or set(
+            correction["before_labels"]
+        ) != set(original["after_labels"]):
+            raise ValueError(f"Unverified correction history: {path}")
+        after = correction["after_labels"]
+        before = original["before_labels"]
+        by_number[correction["number"]] = {
+            **original,
+            "review": original["review"] + "; human-reviewed correction",
+            "after_labels": after,
+            "proposed_final_labels": correction["proposed_final_labels"],
+            "add": sorted(set(after) - set(before)),
+            "remove": sorted(set(before) - set(after)),
+            "rationale": original.get("rationale", []) + correction["rationale"],
+            "checkpoint_verified": correction["checkpoint_verified"],
+            "finished_utc": correction["finished_utc"],
+            "diagnostics": original.get("diagnostics", [])
+            + [f"Earlier rationale superseded where corrected; correction audit: {path}"],
+        }
+records = sorted(by_number.values(), key=lambda r: r["number"])
 sheet_id = 51511501
 requests = []
 if not args.audit_exists:

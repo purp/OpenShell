@@ -227,6 +227,35 @@ submit and read back through the Google Drive connector as for inventory uploads
 uv run --no-project python -m unittest discover -s tasks/scripts -p migrate_open_labels_test.py
 ```
 
+## Reviewed testing corrections
+
+`reviewed-testing-corrections.json` records the 13 human-approved removals of
+`topic:testing` after reviewing the first migration results. Each decision retains
+the other classification labels and pins the reviewed title/body digest.
+
+Prepare a fresh preview with the existing reviewed-item path, then inspect it:
+
+```shell
+uv run --no-project python tasks/scripts/migrate_open_labels.py \
+  --config tasks/labels/reviewed-testing-corrections.json \
+  --output /tmp/openshell-testing-corrections --number "$item" --reviewed
+uv run --no-project python tasks/scripts/apply_reviewed_label_correction.py \
+  "/tmp/openshell-testing-corrections/$item" --remove topic:testing
+```
+
+Add `--apply` to the second command for authorized execution. It accepts only an
+unattempted human-reviewed preview whose final state removes exactly that label.
+The shared helper still checks freshness and exact requests and performs its
+checkpoint bookkeeping. Preserve both the preview audit and application audit;
+an `apply-started.json` blocks replay even after a process failure.
+
+Use `migration_sheet_requests.py --correction-dir
+/tmp/openshell-testing-corrections` alongside the original `--execution-dir`
+arguments to show the corrected final state and net migration changes. It checks
+that each correction starts at the previously recorded final state. Original
+execution files and model usage remain intact, and sheet diagnostics identify
+the correction audit and superseded rationale.
+
 ## Keep the tooling out of upstream
 
 After live definitions and item-level migration are verified, retain the final
