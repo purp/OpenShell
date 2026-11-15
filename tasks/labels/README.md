@@ -203,6 +203,13 @@ helper with the freshly previewed payload. Every attempted item retains
 `execution.json`, evidence, preview, model metrics when used, and application
 results. No classification comments are posted.
 
+For a partial application, compare `applied.json` with live labels, revisions and
+linked inputs before preparing a fresh capture in a different output directory.
+Retain the original attempt. A successful reconciliation must verify its checkpoint;
+merge its history only when its before-labels match the earlier observed after-labels.
+Preserve the coordinator's stopped summary with the resolution audit before marking
+that boundary resumable. A label set that looks correct alone is not verified completion.
+
 Update the review inventory with eligibility, desired labels, differences,
 rationale, review source, and verified outcome. Preserve the original snapshot
 columns and retain fresh before/after labels in the execution audit. Stop
