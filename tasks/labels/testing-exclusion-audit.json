@@ -36,6 +36,26 @@
       "reason": "Conformance scenarios and host-gateway test adaptations verify the new sandbox-access behavior; they do not independently change testing strategy. Preserve the remaining classification under the agreed reviewer-relevance rubric.",
       "review": "Reviewer-relevance exclusion audit",
       "reviewed_body_sha256": "84faa4b6962bb3c00072385f295218ebb893935ddd2fc7e4d1679cff1a9cf95a"
+    },
+    {
+      "number": 5185,
+      "area": "area:runtime",
+      "topics": [
+        "topic:security"
+      ],
+      "reason": "The requested signal and scheduling compatibility fixes include regression tests for their own behavior. Those tests do not independently change testing structure, tooling or strategy. Preserve the remaining runtime/security classification.",
+      "review": "Reviewer-relevance exclusion audit",
+      "reviewed_body_sha256": "d108c15dc02fa55338bee85d30fe0f899fd3ec5ed3bcc86f37b27b4c4d35a42e"
+    },
+    {
+      "number": 5258,
+      "area": "area:drivers",
+      "topics": [
+        "topic:reliability"
+      ],
+      "reason": "The release qualification failure exposes a Podman restart race in product lifecycle state. Its regression test and repeated conformance checks validate that fix; they do not independently change testing structure or tooling. Preserve the remaining drivers/reliability classification.",
+      "review": "Reviewer-relevance exclusion audit",
+      "reviewed_body_sha256": "763f4998e1952136b7b5929ad8d85e7a1db4422428f02cb91c51e4c633977727"
     }
   ]
 }
