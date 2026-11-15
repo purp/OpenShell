@@ -56,6 +56,16 @@
       "reason": "The release qualification failure exposes a Podman restart race in product lifecycle state. Its regression test and repeated conformance checks validate that fix; they do not independently change testing structure or tooling. Preserve the remaining drivers/reliability classification.",
       "review": "Reviewer-relevance exclusion audit",
       "reviewed_body_sha256": "763f4998e1952136b7b5929ad8d85e7a1db4422428f02cb91c51e4c633977727"
+    },
+    {
+      "number": 5305,
+      "area": "area:drivers",
+      "topics": [
+        "topic:gpu"
+      ],
+      "reason": "The Podman supplementary-group bug prevents a CDI workload from starting. Restoring its existing CDI test scenario verifies the driver fix; this does not independently change test structure, tooling or strategy. Preserve the remaining classification.",
+      "review": "Reviewer-relevance exclusion audit",
+      "reviewed_body_sha256": "e5d1b8cb2487e05199490dcbdf63be6f75036afd99edbcad5fad629b7b447856"
     }
   ]
 }
