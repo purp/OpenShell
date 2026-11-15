@@ -257,6 +257,10 @@ unattempted human-reviewed preview whose final state removes exactly that label.
 The shared helper still checks freshness and exact requests and performs its
 checkpoint bookkeeping. Preserve both the preview audit and application audit;
 an `apply-started.json` blocks replay even after a process failure.
+`testing-exclusion-audit.json` records subsequent reviewer-relevance checks. Its
+case-level `review` records that source rather than direct human case review;
+pass the matching `--review-source` when applying its removal previews. The
+acceptance, lifecycle and shared-helper checks still apply.
 
 Use `migration_sheet_requests.py --correction-dir
 /tmp/openshell-testing-corrections` alongside the original `--execution-dir`

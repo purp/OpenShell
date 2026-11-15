@@ -1,0 +1,41 @@
+{
+  "repository": "NVIDIA/OpenShell",
+  "cases": [
+    {
+      "number": 2019,
+      "area": "area:drivers",
+      "topics": [
+        "topic:kubernetes"
+      ],
+      "reason": "Kubernetes client dependency compatibility checks validate the dependency update; no independent testing framework or strategy change is requested. Preserve the remaining classification under the agreed reviewer-relevance rubric.",
+      "review": "Reviewer-relevance exclusion audit",
+      "reviewed_body_sha256": "8e3ae854b6c32975000aa969191aba8b43bec2dc341c861c36e40549f3682993"
+    },
+    {
+      "number": 4098,
+      "area": "area:runtime",
+      "topics": [
+        "topic:policy",
+        "topic:security"
+      ],
+      "reason": "Regression and boundary-escape tests validate the requested Chromium sandbox compatibility fix; workload browser testing is not OpenShell testing infrastructure. Preserve the remaining classification under the agreed reviewer-relevance rubric.",
+      "review": "Reviewer-relevance exclusion audit",
+      "reviewed_body_sha256": "f86c23784b34c6e24d6c1d5225863bc2cf5eedd3af60638e1ed789f52c5951f1"
+    },
+    {
+      "number": 4950,
+      "area": "area:platform",
+      "topics": [
+        "topic:architecture",
+        "topic:documentation",
+        "topic:reliability",
+        "topic:sdk:typescript",
+        "topic:security",
+        "topic:ux"
+      ],
+      "reason": "Conformance scenarios and host-gateway test adaptations verify the new sandbox-access behavior; they do not independently change testing strategy. Preserve the remaining classification under the agreed reviewer-relevance rubric.",
+      "review": "Reviewer-relevance exclusion audit",
+      "reviewed_body_sha256": "84faa4b6962bb3c00072385f295218ebb893935ddd2fc7e4d1679cff1a9cf95a"
+    }
+  ]
+}

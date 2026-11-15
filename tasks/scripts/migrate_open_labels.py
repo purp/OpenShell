@@ -58,7 +58,7 @@ def migrate(args):
         "started_utc": datetime.now(UTC).isoformat(),
         "before_labels": before,
         "preparation_status": preparation["status"],
-        "review": "Human agreed"
+        "review": decision.get("review", "Human agreed")
         if args.reviewed
         else "Sonnet; reviewer-relevance rubric",
         "applied": False,

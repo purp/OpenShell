@@ -17,6 +17,7 @@ def main():
     parser.add_argument("directory", type=Path)
     parser.add_argument("--remove", required=True)
     parser.add_argument("--actor", default="purp")
+    parser.add_argument("--review-source", default="Human agreed")
     parser.add_argument("--apply", action="store_true")
     args = parser.parse_args()
     directory = args.directory
@@ -29,7 +30,7 @@ def main():
 
     record, preview = read("execution.json"), read("preview.json")
     if (
-        record["review"] != "Human agreed"
+        record["review"] != args.review_source
         or record["status"] != "preview"
         or preview["status"] != "preview"
         or preview["add"]
