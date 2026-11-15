@@ -264,6 +264,10 @@ arguments to show the corrected final state and net migration changes. It checks
 that each correction starts at the previously recorded final state. Original
 execution files and model usage remain intact, and sheet diagnostics identify
 the correction audit and superseded rationale.
+The same history merge supports a successful fresh classification after a
+no-write stale attempt. Keep the original attempt and fresh capture separate;
+the sheet retains the actual follow-up review source and totals model time,
+tokens and attempts across both runs.
 
 ## Keep the tooling out of upstream
 

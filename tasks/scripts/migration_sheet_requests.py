@@ -7,6 +7,8 @@ import argparse
 import json
 from pathlib import Path
 
+from label_model_attempts import combined
+
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--inventory-rows", type=Path, required=True)
 parser.add_argument("--execution-dir", type=Path, action="append", required=True)
@@ -36,9 +38,30 @@ for directory in args.correction_dir:
             raise ValueError(f"Unverified correction history: {path}")
         after = correction["after_labels"]
         before = original["before_labels"]
+        metrics = [
+            original.get("model_metrics") or {},
+            correction.get("model_metrics") or {},
+        ]
+        usage_fields = {
+            "wall_seconds",
+            "attempt_count",
+            "usage",
+            "model_usage",
+            "reported_cost_usd",
+            "cli_duration_ms",
+            "api_duration_ms",
+            "preview_wall_seconds",
+        }
+        review = (
+            "human-reviewed correction"
+            if correction["review"] == "Human agreed"
+            else correction["review"]
+        )
         by_number[correction["number"]] = {
             **original,
-            "review": original["review"] + "; human-reviewed correction",
+            "review": original["review"] + "; " + review,
+            "status": correction["status"],
+            "preparation_status": correction["preparation_status"],
             "after_labels": after,
             "proposed_final_labels": correction["proposed_final_labels"],
             "add": sorted(set(after) - set(before)),
@@ -46,8 +69,14 @@ for directory in args.correction_dir:
             "rationale": original.get("rationale", []) + correction["rationale"],
             "checkpoint_verified": correction["checkpoint_verified"],
             "finished_utc": correction["finished_utc"],
-            "diagnostics": original.get("diagnostics", [])
-            + [f"Earlier rationale superseded where corrected; correction audit: {path}"],
+            "model_metrics": {
+                **metrics[0],
+                **combined(
+                    [{k: v for k, v in m.items() if k in usage_fields} for m in metrics]
+                ),
+            },
+            "diagnostics": ["Earlier outcome: " + d for d in original.get("diagnostics", [])]
+            + [f"Earlier rationale superseded where corrected; follow-up audit: {path}"],
         }
 records = sorted(by_number.values(), key=lambda r: r["number"])
 sheet_id = 51511501
