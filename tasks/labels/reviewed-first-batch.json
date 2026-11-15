@@ -1,0 +1,84 @@
+{
+  "repository": "NVIDIA/OpenShell",
+  "cases": [
+    {
+      "number": 5446,
+      "area": "area:platform",
+      "topics": [
+        "topic:operability",
+        "topic:architecture"
+      ],
+      "reason": "Gateway configuration layering supports operators through upgrades and resolves explicit RFC-level merge and precedence decisions. These platform, operability and architecture reviewers are relevant; replace the retired gateway area.",
+      "reviewed_body_sha256": "8207e0535d190b5b104cbdd2201cc832335f6030dbc170a840c5bf161bf28f7d"
+    },
+    {
+      "number": 5287,
+      "area": "area:platform",
+      "topics": [
+        "topic:sdk:python",
+        "topic:architecture",
+        "topic:api"
+      ],
+      "reason": "Python SDK extraction changes component ownership and distribution while explicitly preserving public exports and openshell._proto compatibility. Python SDK, architecture and API reviewers are relevant; replace the retired SDK areas.",
+      "reviewed_body_sha256": "331335cf256a06a23d0464ac3f0029eb7c11f504d02a3b5ba86fff6cc2807f02"
+    },
+    {
+      "number": 5197,
+      "area": "area:runtime",
+      "topics": [
+        "topic:networking",
+        "topic:reliability",
+        "topic:observability"
+      ],
+      "reason": "Supervisor DNS server refresh, retry/failover and required upstream-server diagnostic logs warrant runtime, networking, reliability and observability review.",
+      "reviewed_body_sha256": "831d570fb8eb61d3de4a01275b3e7229a769af6343947cc9cd5a93f01f2e8175"
+    },
+    {
+      "number": 5468,
+      "area": "area:drivers",
+      "topics": [],
+      "reason": "Windows MXC exec and restart are backend-specific execution and lifecycle support. Passing conformance scenarios verifies the feature; this is not a separate test-infrastructure change.",
+      "reviewed_body_sha256": "fd015716d9061f5f10e0fe8ba4d685886b1b76aef2ccc39fdda90d0145072d4c"
+    },
+    {
+      "number": 5413,
+      "area": "area:build",
+      "topics": [
+        "topic:testing",
+        "topic:dx"
+      ],
+      "reason": "The work builds contributor labeling evaluations and reporting, warranting build, testing and developer-experience review. Its model-cost and execution reports are not product gateway/sandbox telemetry.",
+      "reviewed_body_sha256": "630e87fdc6020233d880a7dd702bdca468350d4ca6fb4c7e7ad7651bfd2acf47"
+    },
+    {
+      "number": 5550,
+      "area": "area:build",
+      "topics": [
+        "topic:dx"
+      ],
+      "reason": "CI reviewer-roster validation supports contributor review workflows; the existing build and developer-experience classification is appropriate.",
+      "reviewed_body_sha256": "fc17ddd314911bd3f17392e9956372e4bc1337180db41a3220fa8bbfe50fb827"
+    },
+    {
+      "number": 5226,
+      "area": "area:platform",
+      "topics": [
+        "topic:api",
+        "topic:sdk:rust",
+        "topic:sdk:typescript"
+      ],
+      "reason": "The public readiness contract changes in the Rust and TypeScript SDKs, warranting platform, API and those two language reviewer audiences.",
+      "reviewed_body_sha256": "d421bad5b58e5ed12b35b799379975aa74789391db3af8955f6191d3ed790d01"
+    },
+    {
+      "number": 5517,
+      "area": "area:build",
+      "topics": [
+        "topic:observability",
+        "topic:testing"
+      ],
+      "reason": "A new collector-backed E2E tracing lane is test infrastructure validating exported gateway and Kubernetes-driver traces; build, testing and observability reviewers are relevant.",
+      "reviewed_body_sha256": "f6258ab8923d8e18defbf9fe199051e446c6ced1c316fc01ae9c416785e5652a"
+    }
+  ]
+}

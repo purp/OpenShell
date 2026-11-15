@@ -39,7 +39,7 @@ def prepare(args, config):
         args.number,
         directory / "evidence",
         api=api,
-        force=True,
+        force=not getattr(args, "respect_checkpoints", False),
         trusted_actors={args.actor},
     )
     snapshot = report.pop("snapshot", None)
@@ -115,6 +115,8 @@ Never include shell commands or Markdown fences in the JSON response.
         + skill
         + "\nTRUSTED CONTRACT:\n"
         + contract
+        + "\nMAINTAINER REVIEWER-RELEVANCE RUBRIC (use when interpreting the skill and scopes):\n"
+        + (ROOT / "tasks/labels/reviewer-rubric.md").read_text()
     )
     prompt = "Evaluate this frozen input. Do not make any live changes.\n" + raw_input
     target.mkdir()
@@ -226,9 +228,15 @@ def main():
     parser.add_argument("--number", type=int)
     parser.add_argument("--model", choices=["sonnet", "haiku"])
     parser.add_argument("--actor", default="purp")
+    parser.add_argument("--config", type=Path, default=CONFIG)
+    parser.add_argument(
+        "--respect-checkpoints",
+        action="store_true",
+        help="Honor verified unchanged outcomes during migration",
+    )
     args = parser.parse_args()
     args.output = args.output.resolve()
-    config = json.loads(CONFIG.read_text())
+    config = json.loads(args.config.read_text())
     if args.action != "report" and args.number not in {
         x["number"] for x in config["cases"]
     }:

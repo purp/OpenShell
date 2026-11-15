@@ -176,6 +176,43 @@ Verify the retry boundaries without model requests or GitHub writes:
 uv run --no-project python -m unittest discover -s tasks/scripts -p label_model_attempts_test.py
 ```
 
+## Authorized migration execution
+
+`reviewer-rubric.md` records the maintainer's reviewer-relevance rule, also
+proposed for the permanent skill in #5581. The comparison runner includes it in
+its trusted instructions. `reviewed-first-batch.json` records the eight agreed
+classifications and body hashes from human review.
+
+`migrate_open_labels.py` processes one item. The default is preview only;
+`--apply` is for a migration phase already authorized by the maintainer. It
+prepares fresh evidence, honors acceptance/lifecycle gates, validates output,
+binds application to the exact preview, and verifies final labels. A changed
+reviewed body is held. Existing item directories are never replayed, including
+after partial writes; inspect the audit and explicitly reprepare for recovery.
+
+```shell
+uv run --no-project python tasks/scripts/migrate_open_labels.py --config tasks/labels/reviewed-first-batch.json --reviewed --number 5446 --output /tmp/openshell-reviewed-migration --apply
+```
+
+For later batches, omit `--reviewed` and use a config with `repository`,
+`effort: "medium"`, `models: ["sonnet"]`, and `cases: [{"number": 1234}, ...]`
+derived from the fresh open inventory. The runner respects verified unchanged
+checkpoints and invokes Sonnet only for ready packets. The schema/retry runner
+still has no application path: application occurs here through the shared
+helper with the freshly previewed payload. Every attempted item retains
+`execution.json`, evidence, preview, model metrics when used, and application
+results. No classification comments are posted.
+
+Update the review inventory with eligibility, desired labels, differences,
+rationale, review source, and verified outcome. Preserve the original snapshot
+columns and retain fresh before/after labels in the execution audit. Stop
+starting new items on uncertain writes or systemic failures; honor API retry
+timing. Recheck open-item coverage after the initial inventory is exhausted.
+
+```shell
+uv run --no-project python -m unittest discover -s tasks/scripts -p migrate_open_labels_test.py
+```
+
 ## Keep the tooling out of upstream
 
 After live definitions and item-level migration are verified, retain the final
