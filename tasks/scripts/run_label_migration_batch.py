@@ -73,7 +73,11 @@ def main():
         }
 
     stop = None
+    stop_file = args.output / "coordinator-stop"
     for offset in range(0, len(pending), args.batch_size):
+        if stop_file.exists():
+            stop = {"reason": "Coordinator stop requested at a completed-item boundary"}
+            break
         rates = json.loads(
             subprocess.run(
                 ["gh", "api", "rate_limit"], capture_output=True, text=True, check=True
@@ -88,6 +92,11 @@ def main():
         batch = pending[offset : offset + args.batch_size]
         with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
             for pair_offset in range(0, len(batch), 2):
+                if stop_file.exists():
+                    stop = {
+                        "reason": "Coordinator stop requested at a completed-item boundary"
+                    }
+                    break
                 futures = [
                     pool.submit(item, number)
                     for number in batch[pair_offset : pair_offset + 2]

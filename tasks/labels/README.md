@@ -215,6 +215,11 @@ It skips recorded attempts, refuses to replay incomplete item directories, and
 stops starting items on uncertain writes or low API headroom. Its summary records
 the stop reason and rate-reset information so continuation is explicit.
 
+Create `OUTPUT/coordinator-stop` to stop the coordinator before another pair of
+items starts. In-flight items finish and retain their audits. Remove the file
+before explicitly resuming the same config and output directory. This permits
+coordinator restarts without interrupting a label write.
+
 `migration_sheet_requests.py` generates structured Sheets requests from execution
 audits and a fresh read of the inventory's cell values. It updates only inventory
 columns R:X, preserving the original snapshot, and maintains a separate
