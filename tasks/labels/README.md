@@ -209,6 +209,20 @@ columns and retain fresh before/after labels in the execution audit. Stop
 starting new items on uncertain writes or systemic failures; honor API retry
 timing. Recheck open-item coverage after the initial inventory is exhausted.
 
+`run_label_migration_batch.py --config CONFIG --output OUTPUT --apply` coordinates
+the remaining config with two items at a time and ten-item rate-check batches.
+It skips recorded attempts, refuses to replay incomplete item directories, and
+stops starting items on uncertain writes or low API headroom. Its summary records
+the stop reason and rate-reset information so continuation is explicit.
+
+`migration_sheet_requests.py` generates structured Sheets requests from execution
+audits and a fresh read of the inventory's cell values. It updates only inventory
+columns R:X, preserving the original snapshot, and maintains a separate
+`Migration execution` tab with fresh before/desired/verified-after labels, review
+source, model usage, checkpoints, and diagnostics. The audit includes newly opened
+items absent from the older inventory. Use `--audit-exists` after creating the tab;
+submit and read back through the Google Drive connector as for inventory uploads.
+
 ```shell
 uv run --no-project python -m unittest discover -s tasks/scripts -p migrate_open_labels_test.py
 ```
