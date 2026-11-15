@@ -5,7 +5,13 @@ topic when the work has a clear, substantive connection to it and its reviewers
 would be interested in seeing and potentially reviewing the change. Omit topics
 with only incidental or speculative relevance. Supporting documentation or tests
 can warrant their topic when that reviewer audience is relevant; their presence
-alone does not. Testing work retains its testing topic.
+alone does not.
+
+Do not add `topic:testing` merely because a PR adds or extends tests to cover its
+own code changes, including routine test-task or CI wiring needed to run those
+tests. Judge any substantive changes to testing structure, tooling or strategy
+separately under the reviewer-relevance rubric; this exclusion does not rule out
+test-only work.
 
 Apply this maintainer rubric when interpreting the canonical scopes and the
 skill's shorthand about routine supporting work. Contributor automation belongs
