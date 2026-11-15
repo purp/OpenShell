@@ -42,6 +42,10 @@ def audit(execution_dirs, followup_dirs, active, items_file=None):
             record = read(path)
             if record["status"] not in {"applied", "partial"}:
                 continue
+            before_states = {s for s in record["before_labels"] if s.startswith("state:")}
+            after_states = {s for s in record["after_labels"] if s.startswith("state:")}
+            if before_states != after_states:
+                errors.append(f"#{number}: disposition labels changed during application")
             packet = read(path.parent / "evidence/packet.json")
             manifest = read(path.parent / "evidence/manifest.json")
             if not packet["eligibility"]["accepted"]:

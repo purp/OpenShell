@@ -238,6 +238,9 @@ During bulk execution, upload after three completed ten-item batches, or sooner
 when a new exception occurs or the coordinator stops. Per-item local audits are
 written immediately; batching the full-sheet transfer avoids growing upload
 overhead. Verify the sheet readback before marking an upload complete.
+For large payloads, read JSON-encoded 64,000-character local chunks with up to four
+concurrent reads, retaining their order. Reject a failed chunk before submitting
+the structured request; still verify the complete sheet readback.
 
 ```shell
 uv run --no-project python -m unittest discover -s tasks/scripts -p migrate_open_labels_test.py
@@ -281,7 +284,8 @@ the sheet retains the actual follow-up review source and totals model time,
 tokens and attempts across both runs.
 
 `audit_label_migration.py` independently checks recorded application eligibility,
-open lifecycle, recovery chains, checkpoints and final classification sets. Add
+open lifecycle, disposition preservation, recovery chains, checkpoints and final
+classification sets. Add
 `--items-file` with a fresh paginated open-issues capture to report uncovered
 items, live-label differences and remaining retired associations. Live differences
 are review findings: another actor may have changed labels after the recorded run.
