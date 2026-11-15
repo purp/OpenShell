@@ -227,6 +227,10 @@ columns R:X, preserving the original snapshot, and maintains a separate
 source, model usage, checkpoints, and diagnostics. The audit includes newly opened
 items absent from the older inventory. Use `--audit-exists` after creating the tab;
 submit and read back through the Google Drive connector as for inventory uploads.
+During bulk execution, upload after three completed ten-item batches, or sooner
+when a new exception occurs or the coordinator stops. Per-item local audits are
+written immediately; batching the full-sheet transfer avoids growing upload
+overhead. Verify the sheet readback before marking an upload complete.
 
 ```shell
 uv run --no-project python -m unittest discover -s tasks/scripts -p migrate_open_labels_test.py
