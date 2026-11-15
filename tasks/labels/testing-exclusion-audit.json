@@ -66,6 +66,16 @@
       "reason": "The Podman supplementary-group bug prevents a CDI workload from starting. Restoring its existing CDI test scenario verifies the driver fix; this does not independently change test structure, tooling or strategy. Preserve the remaining classification.",
       "review": "Reviewer-relevance exclusion audit",
       "reviewed_body_sha256": "e5d1b8cb2487e05199490dcbdf63be6f75036afd99edbcad5fad629b7b447856"
+    },
+    {
+      "number": 5507,
+      "area": "area:drivers",
+      "topics": [
+        "topic:reliability"
+      ],
+      "reason": "The requested outcome is repairing VM overlay recovery and restart failure reporting. Moving its existing lifecycle regression test into the current conformance runner verifies that fix across drivers; this does not independently change testing tooling or strategy. Preserve the remaining classification.",
+      "review": "Reviewer-relevance exclusion audit",
+      "reviewed_body_sha256": "c44aaba8a384eaadbe507087daad5b949bbb785a4aafe3bbe377ec10a422371b"
     }
   ]
 }
