@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--inventory-rows", type=Path, required=True)
 parser.add_argument("--execution-dir", type=Path, action="append", required=True)
 parser.add_argument("--correction-dir", type=Path, action="append", default=[])
+parser.add_argument("--verification-file", type=Path)
 parser.add_argument("--audit-exists", action="store_true")
 args = parser.parse_args()
 rows = json.loads(args.inventory_rows.read_text())
@@ -80,6 +81,32 @@ for directory in args.correction_dir:
             + [f"Earlier rationale superseded where corrected; follow-up audit: {path}"],
         }
 records = sorted(by_number.values(), key=lambda r: r["number"])
+if args.verification_file:
+    verification = json.loads(args.verification_file.read_text())
+    if (
+        verification["errors"]
+        or verification["unrecorded_open"]
+        or verification["recorded_items"] != len(records)
+    ):
+        raise ValueError("Final verification has errors or incomplete coverage")
+    for number, observation in verification["label_state_differences"].items():
+        record = by_number[int(number)]
+        before, live = set(observation["recorded"]), set(observation["live"])
+        if before != set(record["after_labels"]):
+            raise ValueError(f"Verification baseline mismatch for #{number}")
+        prefixes = ("area:", "topic:", "retired:area:", "retired:topic:")
+        if {s for s in before if s.startswith(prefixes)} != {
+            s for s in live if s.startswith(prefixes)
+        }:
+            raise ValueError(f"Classification drift requires review for #{number}")
+        record["diagnostics"] = record.get("diagnostics", []) + [
+            "Later open-inventory verification observed unrelated label changes; "
+            f"removed: {', '.join(sorted(before - live)) or 'none'}; "
+            f"added: {', '.join(sorted(live - before)) or 'none'}. "
+            "Classification unchanged; retained live unrelated labels. "
+            "Recorded after-state remains the application-time observation. "
+            f"Verification source: {args.verification_file}"
+        ]
 sheet_id = 51511501
 requests = []
 if not args.audit_exists:

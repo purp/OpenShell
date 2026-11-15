@@ -290,6 +290,10 @@ classification sets. Add
 items, live-label differences and remaining retired associations. Live differences
 are review findings: another actor may have changed labels after the recorded run.
 The audit makes no remote requests or label changes.
+Pass its final inventory comparison to `migration_sheet_requests.py` with
+`--verification-file` to append later unrelated-label observations to diagnostics.
+This preserves application-time after-states and rejects classification drift or
+uncovered open items before final publication.
 
 ```shell
 uv run --no-project python tasks/scripts/audit_label_migration.py \
