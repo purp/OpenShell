@@ -280,6 +280,21 @@ no-write stale attempt. Keep the original attempt and fresh capture separate;
 the sheet retains the actual follow-up review source and totals model time,
 tokens and attempts across both runs.
 
+`audit_label_migration.py` independently checks recorded application eligibility,
+open lifecycle, recovery chains, checkpoints and final classification sets. Add
+`--items-file` with a fresh paginated open-issues capture to report uncovered
+items, live-label differences and remaining retired associations. Live differences
+are review findings: another actor may have changed labels after the recorded run.
+The audit makes no remote requests or label changes.
+
+```shell
+uv run --no-project python tasks/scripts/audit_label_migration.py \
+  --execution-dir /tmp/openshell-reviewed-migration \
+  --execution-dir /tmp/openshell-backlog-migration \
+  --followup-dir /tmp/openshell-testing-corrections \
+  --output /tmp/openshell-migration-local-audit.json
+```
+
 ## Keep the tooling out of upstream
 
 After live definitions and item-level migration are verified, retain the final
