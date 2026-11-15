@@ -20,6 +20,7 @@ class MigrationTest(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.bundle, self.snapshot, _ = fixtures()
+        self.snapshot["item_material"] = {"state": "open"}
         body = {"title": "DNS defect", "body": "Supervisor DNS resolution fails."}
         self.snapshot["existing_labels"] = ["state:accepted"]
         self.bundle["packet"].update(
@@ -123,6 +124,14 @@ class MigrationTest(unittest.TestCase):
         p.assert_not_called()
         a.assert_not_called()
         self.assertEqual(record["status"], "held")
+
+    def test_closed_but_helper_eligible_item_is_outside_open_rollout(self):
+        self.args.apply = True
+        self.snapshot["item_material"]["state"] = "closed"
+        p, a, record = self.execute()
+        p.assert_not_called()
+        a.assert_not_called()
+        self.assertEqual(record["status"], "skipped")
 
     def test_partial_write_is_recorded_and_not_replayed(self):
         self.args.apply = True

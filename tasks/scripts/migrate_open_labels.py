@@ -96,6 +96,16 @@ def migrate(args):
         finish(preparation)
         return
     snapshot = json.loads((directory / "evidence/manifest.json").read_text())
+    if snapshot["item_material"]["state"] != "open":
+        finish(
+            {
+                "status": "skipped",
+                "diagnostics": [
+                    "Item is no longer open; outside this migration rollout"
+                ],
+            }
+        )
+        return
     if args.reviewed:
         body = packet["evidence_index"]["body"]["content"]
         digest = hashlib.sha256(
